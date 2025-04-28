@@ -1,3 +1,40 @@
+# MTGTRACKER
+
+## Podział zadań
+
+//TODO
+
+## Link do figmy:
+https://www.figma.com/design/FE3T1AqWrnV9siZ8UYKtlE/Untitled?node-id=0-1&p=f&t=yrfTyKSlPVegPRki-0
+
+
+## Uruchamianie
+
+1. Instalacja bibliotek
+   ```bash 
+   npm install
+   ```
+2. Uruchamianie aplikacji
+   ```bash
+    npx expo start
+   ```
+
+
+## Przygotowanie środowiska
+### Wymagane dodatkowo:
+- Git
+- Node
+
+**Większość** znajduje się [tutaj](https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=simulated&mode=expo-go)
+
+Na windowsa nie jest opisane jak dodać zmienne środowiskowe dlatego dodatkowy link:
+https://reactnative.dev/docs/set-up-your-environment
+
+
+
+
+# Dokumentacja początkowa projektu poniżej ---------
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
