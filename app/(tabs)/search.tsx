@@ -1,14 +1,54 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, FlatList, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, Pressable, FlatList, Dimensions, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // pakiet ikon
+import { router, useLocalSearchParams } from 'expo-router';
+import type { Card } from '../types/card';
 
-const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2; // dwie karty w rzędzie
+// Calculate dimensions for the grid
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const GRID_PADDING = 16;
+const CARD_MARGIN = 8;
+const GRID_COLUMNS = 2;
+
+// Calculate card width based on screen size and grid parameters
+const CARD_WIDTH = (SCREEN_WIDTH - (GRID_PADDING * 2) - (CARD_MARGIN * (GRID_COLUMNS * 2))) / GRID_COLUMNS;
+// Use MTG card aspect ratio (63mm × 88mm)
+const CARD_HEIGHT = CARD_WIDTH * (88 / 63);
 
 export default function CardGridScreen() {
-  const cards = Array.from({ length: 20 }, (_, index) => ({
-    id: index.toString(),
-    title: 'Card template',
-  }));
+  const params = useLocalSearchParams<{ searchResults?: string }>();
+  const [cards, setCards] = useState<Card[]>(() => {
+    if (params.searchResults) {
+      return JSON.parse(params.searchResults);
+    }
+    return [];
+  });
+
+  const getCardImage = (card: Card): string => {
+    if (card.image_uris?.border_crop) {
+      return card.image_uris.border_crop;
+    }
+    // Handle double-faced cards
+    if (card.card_faces?.[0]?.image_uris?.border_crop) {
+      return card.card_faces[0].image_uris.border_crop;
+    }
+    return ''; // Fallback if no image is found
+  };
+
+  const renderCard = ({ item }: { item: Card }) => {
+    const imageUri = getCardImage(item);
+    return (
+      <View style={styles.cardContainer}>
+        <View style={styles.card}>
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.cardImage}
+            resizeMode="cover"
+          />
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -28,7 +68,7 @@ export default function CardGridScreen() {
         <Pressable style={styles.navButton}>
           <Text style={styles.navButtonText}>Previous</Text>
         </Pressable>
-        <Pressable style={styles.navButton}>
+        <Pressable style={styles.navButton} onPress={() => router.push('/filter')}>
           <Ionicons name="filter-outline" size={20} color="white" />
           <Text style={styles.navButtonText}>Filter</Text>
         </Pressable>
@@ -40,12 +80,16 @@ export default function CardGridScreen() {
       {/* Lista kart */}
       <FlatList
         data={cards}
-        numColumns={2}
+        numColumns={GRID_COLUMNS}
         contentContainerStyle={styles.cardsList}
+        columnWrapperStyle={styles.row}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.cardText}>{item.title}</Text>
+        renderItem={renderCard}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>
+              Use the filter to search for cards
+            </Text>
           </View>
         )}
       />
@@ -58,7 +102,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#111',
-    padding: 8,
+    padding: GRID_PADDING,
   },
   header: {
     flexDirection: 'row',
@@ -92,18 +136,42 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   cardsList: {
-    gap: 8,
+    paddingVertical: CARD_MARGIN,
+  },
+  row: {
+    justifyContent: 'flex-start',
+  },
+  cardContainer: {
+    margin: CARD_MARGIN,
   },
   card: {
     width: CARD_WIDTH,
-    aspectRatio: 0.7,
-    backgroundColor: '#666',
+    height: CARD_HEIGHT,
+    backgroundColor: '#222',
     borderRadius: 8,
-    margin: 8,
+    overflow: 'hidden',
+    // Add shadow for better visual separation
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  emptyState: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 32,
   },
-  cardText: {
-    color: 'white',
+  emptyStateText: {
+    color: '#666',
+    fontSize: 16,
   },
 });
