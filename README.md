@@ -2,16 +2,26 @@
 
 ## Podział zadań
 
-//TODO
+- ~~Inicjalizacja projektu~~ - KM
+- ~~Ekran startowy~~ - KM
+- ~~Interfejs z wyszukiwaniem~~ - RK
+- ~~Interfejs z filtrami~~ - RK
+- ~~Interfejs Trackera~~ - KM
+- Logika odpytywania API
+- Logika zapisywania do localstorage (tracker)
+- Overlay damage
+- Overlay Counters
+- Poprawa UI
+- Cleanup projektu
 
 ## Link do figmy:
-https://www.figma.com/design/FE3T1AqWrnV9siZ8UYKtlE/Untitled?node-id=0-1&p=f&t=yrfTyKSlPVegPRki-0
 
+https://www.figma.com/design/FE3T1AqWrnV9siZ8UYKtlE/Untitled?node-id=0-1&p=f&t=yrfTyKSlPVegPRki-0
 
 ## Uruchamianie
 
 1. Instalacja bibliotek
-   ```bash 
+   ```bash
    npm install
    ```
 2. Uruchamianie aplikacji
@@ -19,9 +29,10 @@ https://www.figma.com/design/FE3T1AqWrnV9siZ8UYKtlE/Untitled?node-id=0-1&p=f&t=y
     npx expo start
    ```
 
-
 ## Przygotowanie środowiska
+
 ### Wymagane dodatkowo:
+
 - Git
 - Node
 
@@ -29,9 +40,6 @@ https://www.figma.com/design/FE3T1AqWrnV9siZ8UYKtlE/Untitled?node-id=0-1&p=f&t=y
 
 Na windowsa nie jest opisane jak dodać zmienne środowiskowe dlatego dodatkowy link:
 https://reactnative.dev/docs/set-up-your-environment
-
-
-
 
 # Dokumentacja początkowa projektu poniżej ---------
 
