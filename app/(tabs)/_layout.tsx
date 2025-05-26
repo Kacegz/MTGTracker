@@ -18,26 +18,60 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
           },
-          default: {},
+          default: { height: 55 },
         }),
-      }}>
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="main/index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="house.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="search" color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="filter"
+        options={{
+          title: 'Filter',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="filter" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tracker"
+        options={{
+          title: 'Tracker',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="tracker" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          ),
         }}
       />
     </Tabs>
