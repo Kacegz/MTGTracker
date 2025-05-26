@@ -1,31 +1,39 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Pressable,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 export default function MTGTrackerScreen() {
-        const router = useRouter();
-          const handleNavigate = (path: string) => {
-            router.push(path);
-          };
+  const router = useRouter();
+  const handleNavigate = (path: string) => {
+    router.push(path);
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>MTG Tracker</Text>
-        <Image
-          source={require('@/assets/images/icon.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        <Ionicons name="dice-outline" size={100} color="white" />
       </View>
 
       <View style={styles.grid}>
-
-                <Pressable style={styles.button} onPress={() => handleNavigate('/tracker')}>
+        <Pressable
+          style={styles.button}
+          onPress={() => handleNavigate('/tracker')}
+        >
           <Text style={styles.buttonText}>Tracker</Text>
-                </Pressable>
-                <Pressable style={styles.button} onPress={() => handleNavigate('/search')}>
+        </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={() => handleNavigate('/search')}
+        >
           <Text style={styles.buttonText}>Search</Text>
-                </Pressable>
-
+        </Pressable>
       </View>
     </View>
   );
