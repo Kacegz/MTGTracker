@@ -11,8 +11,9 @@
 - ~~Logika zapisywania do localstorage (tracker)~~ RW
 - ~~Overlay damage~~ RW
 - ~~Overlay Counters~~ RW
-- Poprawa UI
+- Poprawa UI - KW
 - Cleanup projektu
+- Dokumentacja - KW
 
 ## Link do figmy:
 
