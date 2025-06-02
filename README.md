@@ -8,9 +8,9 @@
 - ~~Interfejs z filtrami~~ - RK
 - ~~Interfejs Trackera~~ - KM
 - Logika odpytywania API
-- Logika zapisywania do localstorage (tracker)
-- Overlay damage
-- Overlay Counters
+- ~~Logika zapisywania do localstorage (tracker)~~ RW
+- ~~Overlay damage~~ RW
+- ~~Overlay Counters~~ RW
 - Poprawa UI
 - Cleanup projektu
 
