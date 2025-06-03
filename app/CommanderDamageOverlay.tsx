@@ -184,7 +184,7 @@ const DamageScreen = ({
         return (
           <View style={[
             styles.playerSection,
-            { backgroundColor: player.color },
+            { backgroundColor: isPartner ? player.color : '#333' },
             isTop ? styles.topSection : styles.bottomSection,
             isLeft ? styles.leftSection : styles.rightSection,
             isInitiatingPlayer ? styles.initiatingPlayer : null
@@ -212,7 +212,7 @@ const DamageScreen = ({
                   style={styles.controlButton}
                   onPress={() => adjustDamage(player.id, -1)}
                 >
-                  <Ionicons name="remove" size={30} color="white" />
+                  <Ionicons name="remove" size={64} color="white" />
                 </Pressable>
                 
                 <Text style={styles.damageValue}>{damage}</Text>
@@ -221,11 +221,16 @@ const DamageScreen = ({
                   style={styles.controlButton}
                   onPress={() => adjustDamage(player.id, 1)}
                 >
-                  <Ionicons name="add" size={30} color="white" />
+                  <Ionicons name="add" size={64} color="white" />
                 </Pressable>
               </View>
       
-              <View style={styles.partnerSection}>
+              <View
+                style={[
+                  styles.playerSection
+                  
+                ]}
+                >
                 <Text style={styles.partnerLabel}>Partner</Text>
                 <Switch
                   value={isPartner}
@@ -298,6 +303,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    
   },
   playerContent: {
     alignItems: 'center',
@@ -318,47 +324,51 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
+    paddingTop: 5,
   },
   controlButton: {
-    padding: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    padding: 25,
     borderRadius: 25,
     width: 50,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: -20,
   },
   damageValue: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 100,
+    fontWeight: '600',
     color: 'white',
     textAlign: 'center',
-    marginBottom: 5,
+    marginBottom: 0,
   },
   partnerSection: {
     alignItems: 'center',
-    gap: 5,
+    gap: 10,
+    paddingBottom: 20,
   },
   partnerLabel: {
-    fontSize: 14,
+    fontSize: 18,
     color: 'white',
     fontWeight: '600',
+    paddingBottom: 0,
   },
   middleSection: {
     flexDirection: 'row',
-    backgroundColor: '#333',
-    paddingVertical: 15,
+    backgroundColor: '#222',
+    paddingVertical: 10,
     paddingHorizontal: 20,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 40,
   },
   gameButton: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingVertical: 10,
   },
   gameButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   optionsButton: {
@@ -371,14 +381,14 @@ const styles = StyleSheet.create({
   
   resetButton: {
     paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingVertical: 6,
     backgroundColor: '#ff4444',
     borderRadius: 5,
   },
   
   resetButtonText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   
@@ -395,6 +405,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.8,
   },
+
+
 });
 
 export default DamageScreen;

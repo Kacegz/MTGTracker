@@ -125,72 +125,132 @@ export default function FilterScreen() {
         <View style={styles.colorSection}>
           <Text style={styles.label}>Colors</Text>
           <View style={styles.colorGrid}>
-            <ColorButton 
-              color="White" 
+            <View style={styles.colorItem}>
+              <ColorButton 
+              color="" 
               isSelected={selectedColors.includes('White')}
               onPress={() => toggleColor('White')}
-            />
+              />
+              <Text style={styles.TextButton}>
+                White
+              </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Blue" 
+              color="" 
               isSelected={selectedColors.includes('Blue')}
               onPress={() => toggleColor('Blue')}
             />
+            <Text style={styles.TextButton}>
+              Blue
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Black" 
+              color="" 
               isSelected={selectedColors.includes('Black')}
               onPress={() => toggleColor('Black')}
             />
+            <Text style={styles.TextButton}>
+              Black
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Red" 
+              color="" 
               isSelected={selectedColors.includes('Red')}
               onPress={() => toggleColor('Red')}
             />
+            <Text style={styles.TextButton}>
+              Red
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Green" 
+              color="" 
               isSelected={selectedColors.includes('Green')}
               onPress={() => toggleColor('Green')}
             />
+            <Text style={styles.TextButton}>
+              Green
+            </Text>
+            </View>
+             <View style={styles.colorItem}>
             <ColorButton 
-              color="Colorless" 
+              color="" 
               isSelected={selectedColors.includes('Colorless')}
               onPress={() => toggleColor('Colorless')}
             />
+            <Text style={styles.TextButton}>
+              Colorless
+            </Text>
+            </View>
           </View>
         </View>
 
         <View style={styles.colorSection}>
           <Text style={styles.label}>Commander</Text>
           <View style={styles.colorGrid}>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="White" 
+              color="" 
               isSelected={selectedCommanderColors.includes('White')}
               onPress={() => toggleColor('White', true)}
             />
+            <Text style={styles.TextButton}>
+              White
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Blue" 
+              color="" 
               isSelected={selectedCommanderColors.includes('Blue')}
               onPress={() => toggleColor('Blue', true)}
             />
+            <Text style={styles.TextButton}>
+              Blue
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Black" 
+              color="" 
               isSelected={selectedCommanderColors.includes('Black')}
               onPress={() => toggleColor('Black', true)}
             />
+            <Text style={styles.TextButton}>
+              Black
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Red" 
+              color="" 
               isSelected={selectedCommanderColors.includes('Red')}
               onPress={() => toggleColor('Red', true)}
             />
+            <Text style={styles.TextButton}>
+              Red
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Green" 
+              color="" 
               isSelected={selectedCommanderColors.includes('Green')}
               onPress={() => toggleColor('Green', true)}
             />
+            <Text style={styles.TextButton}>
+              Green
+            </Text>
+            </View>
+            <View style={styles.colorItem}>
             <ColorButton 
-              color="Colorless" 
+              color="" 
               isSelected={selectedCommanderColors.includes('Colorless')}
               onPress={() => toggleColor('Colorless', true)}
             />
+            <Text style={styles.TextButton}>
+              Colorless
+            </Text>
+            </View>
           </View>
         </View>
 
@@ -241,22 +301,28 @@ export default function FilterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111',
+    backgroundColor: '#222',
+    padding: 0,
   },
   scrollView: {
     flex: 1,
-    padding: 16,
+    padding: 0,
   },
   header: {
     flexDirection: 'row',
     marginBottom: 20,
+    marginLeft: 25,
   },
   backButton: {
     color: 'white',
     fontSize: 24,
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
+    paddingVertical: 10,
+    borderTopWidth: 1, 
+    borderTopColor: '#000',
+    padding: 25,
   },
   label: {
     color: 'white',
@@ -264,56 +330,104 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   input: {
-    backgroundColor: '#222',
-    borderRadius: 8,
+    backgroundColor: '#111',
+    borderRadius: 45,
     padding: 12,
     color: 'white',
     fontSize: 16,
   },
   colorSection: {
-    marginTop: 16,
+    marginTop: 0,
+    borderTopWidth: 1, 
+    borderTopColor: '#000',
+    paddingHorizontal: 25,
+    paddingVertical: 5,
   },
   colorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: 8,
+    width: '100%',
   },
+
+  colorItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '30%', // 3 kolumny
+    marginBottom: 16,
+  },
+
+  colorItemText: {
+    color: 'white',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+
   colorButton: {
-    backgroundColor: '#222',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    minWidth: 100,
+    width: '100%',
+    aspectRatio: 1,
+    maxWidth: 60,
+    backgroundColor: '#111',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  TextButton:{
+    width: 80,
+    height: 40,
+    color: 'white',
+    fontSize: 18,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 0,
   },
   colorButtonSelected: {
-    backgroundColor: '#444',
-    borderWidth: 1,
-    borderColor: '#666',
+    backgroundColor: '#4A90E2',
+    borderWidth: 2,
+    borderColor: '#4A90E2',
   },
+  colorCheckmark: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
+
   colorButtonText: {
     color: 'white',
+    fontSize: 13,
+    marginTop: 4,
     textAlign: 'center',
   },
+
   raritySection: {
-    marginTop: 16,
+    marginTop: 8,
     marginBottom: 80,
+    borderTopWidth: 1, 
+    borderTopColor: '#000',
+    paddingHorizontal: 25,
+    paddingVertical: 5,
   },
   rarityGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: "space-between",
   },
   rarityButton: {
-    backgroundColor: '#222',
+    backgroundColor: '#111',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
     minWidth: 80,
+
   },
   rarityButtonSelected: {
-    backgroundColor: '#444',
-    borderWidth: 1,
-    borderColor: '#666',
+    backgroundColor: '#4A90E2',
+    borderWidth: 0,
+    borderColor: '#4A90E2',
   },
   rarityButtonText: {
     color: 'white',
@@ -340,4 +454,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  
 }); 

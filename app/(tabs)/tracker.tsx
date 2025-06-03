@@ -1,29 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import CountersOverlay from './CountersOverlay';
-import DamageScreen from './CommanderDamageOverlay';
+import CountersOverlay from '../CountersOverlay';
+import DamageScreen from '../CommanderDamageOverlay';
+import { LinearGradient } from 'expo-linear-gradient';
+type DamageMap = Record<number, Record<number, number>>;
+type PlayerCountersMap = Record<number, Record<string, number>>;
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+const darkenHex = (hex: string, percent = 20) => {
+  const num = parseInt(hex.slice(1), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.max(0, (num >> 16) - amt);
+  const G = Math.max(0, ((num >> 8) & 0xff) - amt);
+  const B = Math.max(0, (num & 0xff) - amt);
+  return `#${(R << 16 | G << 8 | B).toString(16).padStart(6, '0')}`;
+};
+
 
 const players = [
   { id: 1, name: 'Player 1', color: '#1E3A8A' },
   { id: 2, name: 'Player 2', color: '#CA8A04' },
   { id: 3, name: 'Player 3', color: '#15803D' },
   { id: 4, name: 'Player 4', color: '#B91C1C' },
-];
+]
 
 const COUNTER_TYPES = [
   'generic', 'energy', 'poison', 'experience', 'elderRing', 'storm'
 ];
 
 export default function LifeCounterScreen() {
-  const [health, setHealth] = useState({});
-  const [counters, setCounters] = useState({});
-  const [playerModes, setPlayerModes] = useState({});
-  const [commanderDamage, setCommanderDamage] = useState({});
+  const [health, setHealth] = useState<Record<number, number>>({});
+  const [counters, setCounters] = useState<Record<number, Record<string, number>>>({});
+  const [playerModes, setPlayerModes] = useState<Record<number, string[]>>({});
+  const [commanderDamage, setCommanderDamage] = useState<Record<number, Record<number, number>>>({});
   const [overlayVisible, setOverlayVisible] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const [damageScreenVisible, setDamageScreenVisible] = useState(false);
-  const [initiatingPlayerId, setInitiatingPlayerId] = useState(null);
+  const [initiatingPlayerId, setInitiatingPlayerId] = useState<number | null>(null);
 
   useEffect(() => {
     loadHealth(); 
@@ -53,7 +67,7 @@ export default function LifeCounterScreen() {
     }
   };
 
-  const saveHealth = (newHealth) => {
+  const saveHealth = (newHealth: React.SetStateAction<{}>) => {
     try {
       localStorage.setItem('playerHealth', JSON.stringify(newHealth));
       setHealth(newHealth);
@@ -68,7 +82,7 @@ export default function LifeCounterScreen() {
       if (savedDamage) {
         setCommanderDamage(JSON.parse(savedDamage));
       } else {
-        const initialDamage = {};
+        const initialDamage: DamageMap = {};
         players.forEach(player => {
           initialDamage[player.id] = {};
           players.forEach(target => {
@@ -85,7 +99,7 @@ export default function LifeCounterScreen() {
     }
   };
 
-  const saveCommanderDamage = (newDamage) => {
+  const saveCommanderDamage = (newDamage: React.SetStateAction<{}>) => {
     try {
       localStorage.setItem('commanderDamage', JSON.stringify(newDamage));
       setCommanderDamage(newDamage);
@@ -100,15 +114,16 @@ export default function LifeCounterScreen() {
       if (savedCounters) {
         setCounters(JSON.parse(savedCounters));
       } else {
-        const initialCounters = {};
-        players.forEach(player => {
-          initialCounters[player.id] = {};
-          COUNTER_TYPES.forEach(counter => {
-            initialCounters[player.id][counter] = 0;
-          });
+      const initialCounters: PlayerCountersMap = {};
+      players.forEach(player => {
+        initialCounters[player.id] = {} as Record<string, number>; // lub Record<CounterType, number>
+        COUNTER_TYPES.forEach(counter => {
+          initialCounters[player.id][counter] = 0;
         });
-        setCounters(initialCounters);
-        localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
+      });
+
+setCounters(initialCounters);
+localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
       }
     } catch (error) {
       console.error('Error loading counters:', error);
@@ -121,7 +136,7 @@ export default function LifeCounterScreen() {
       if (savedModes) {
         setPlayerModes(JSON.parse(savedModes));
       } else {
-        const initialModes = {};
+        const initialModes: { [key: number]: any[] } = {};
         players.forEach(player => {
           initialModes[player.id] = [];
         });
@@ -133,7 +148,7 @@ export default function LifeCounterScreen() {
     }
   };
 
-  const saveCounters = (newCounters) => {
+  const saveCounters = (newCounters: React.SetStateAction<{}>) => {
     try {
       localStorage.setItem('playerCounters', JSON.stringify(newCounters));
       setCounters(newCounters);
@@ -142,7 +157,7 @@ export default function LifeCounterScreen() {
     }
   };
 
-  const savePlayerModes = (newModes) => {
+  const savePlayerModes = (newModes: React.SetStateAction<{}>) => {
     try {
       localStorage.setItem('playerModes', JSON.stringify(newModes));
       setPlayerModes(newModes);
@@ -205,7 +220,7 @@ export default function LifeCounterScreen() {
     let newModes;
     
     if (currentModes.includes(mode)) {
-      newModes = currentModes.filter(m => m !== mode);
+      newModes = currentModes.filter((m: string) => m !== mode);
     } else {
       newModes = [...currentModes, mode];
     }
@@ -250,7 +265,7 @@ export default function LifeCounterScreen() {
         <Pressable>
           <Text style={styles.menuText}>GAME</Text>
         </Pressable>
-        <Ionicons name="settings-outline" size={24} color="white" />
+        <Ionicons name="settings-outline" size={28} color="white" />
         <Pressable>
           <Text style={styles.menuText}>OPTIONS</Text>
         </Pressable>
@@ -302,7 +317,7 @@ type PlayerPanelProps = {
   onAdjustHealth: (playerId: number, amount: number) => void;
   onOpenCounters: () => void;
   onOpenDamage: () => void;
-  playerMode: string;
+  playerMode: string[];
 };
 
 function PlayerPanel({ player, health, onAdjustHealth, onOpenCounters, onOpenDamage, playerMode }: PlayerPanelProps) {
@@ -310,61 +325,75 @@ function PlayerPanel({ player, health, onAdjustHealth, onOpenCounters, onOpenDam
   const iconTextRotation = isLeftSide ? '90deg' : '-90deg';
   
   return (
-    <View style={[styles.playerPanel, { backgroundColor: player.color },{flexDirection: isLeftSide ? 'row' : 'row-reverse'}]}>
+    <LinearGradient
+        colors={isLeftSide 
+          ? [darkenHex(player.color, 30), player.color] 
+          : [player.color, darkenHex(player.color, 30)]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[
+          styles.playerPanel,
+          { flexDirection: isLeftSide ? 'row' : 'row-reverse' }
+        ]}
+      >  
+      <View style={styles.playerName}>
+        <Text style={[styles.playerName, { transform: [{ rotate: iconTextRotation }] }]}>
+          {player.name}
+        </Text>
+      </View>
       <View style={styles.sideMenu}>
-        <Pressable style={styles.iconButton}>
-          <View style={styles.iconWrapper}>
-            <Ionicons 
-              name="settings-outline" 
-              size={20} 
-              color="white" 
-              style={{ transform: [{ rotate: iconTextRotation }] }}
-            />
-          </View>
-        </Pressable>
-        
         <Pressable style={styles.iconButton} onPress={onOpenDamage}>
           <View style={[
             styles.iconWithTextWrapper,
             { flexDirection: isLeftSide ? 'column' : 'column-reverse' }
           ]}>
-            <View style={styles.iconWrapper}>
+            <View style={[
+                styles.iconWrapper,
+                !isLeftSide && styles.iconWrapperRight // dodaj tylko jeśli nie lewa strona
+              ]}>
               <Ionicons 
                 name="flash-outline" 
-                size={20} 
+                size={24} 
                 color="white" 
                 style={{ transform: [{ rotate: iconTextRotation }] }}
               />
             </View>
             <View style={styles.rotatedTextWrapper}>
               <Text style={[
-                styles.sideText, 
-                { transform: [{ rotate: iconTextRotation }] }
-              ]}>
+                      styles.sideText,
+                      !isLeftSide && styles.sideTextRight,
+                      { transform: [{ rotate: iconTextRotation }] }
+                    ]}>
                 Damage
               </Text>
             </View>
-          </View>
+            </View>
         </Pressable>
+        
+        
         
         <Pressable style={styles.iconButton} onPress={onOpenCounters}>
           <View style={[
             styles.iconWithTextWrapper,
             { flexDirection: isLeftSide ? 'column' : 'column-reverse' }
           ]}>
-            <View style={styles.iconWrapper}>
+            <View style={[
+                styles.iconWrapper,
+                !isLeftSide && styles.iconWrapperRight // dodaj tylko jeśli nie lewa strona
+              ]}>
               <Ionicons 
                 name="apps-outline" 
-                size={20} 
+                size={24} 
                 color="white" 
                 style={{ transform: [{ rotate: iconTextRotation }] }}
               />
             </View>
             <View style={styles.rotatedTextWrapper}>
               <Text style={[
-                styles.sideText, 
-                { transform: [{ rotate: iconTextRotation }] }
-              ]}>
+                      styles.sideText,
+                      !isLeftSide && styles.sideTextRight,
+                      { transform: [{ rotate: iconTextRotation }] }
+                    ]}>
                 Counters
               </Text>
             </View>
@@ -377,7 +406,9 @@ function PlayerPanel({ player, health, onAdjustHealth, onOpenCounters, onOpenDam
           style={styles.adjustButtonContainer}
           onPress={() => onAdjustHealth(player.id, -1)}
         >
-          <Text style={styles.adjustButton}>-</Text>
+          <Text style={[styles.adjustButton,
+            {transform : [{ rotate: '90deg' }]}
+          ]}>-</Text>
         </Pressable>
 
         <View style={styles.health}>
@@ -395,10 +426,12 @@ function PlayerPanel({ player, health, onAdjustHealth, onOpenCounters, onOpenDam
           style={styles.adjustButtonContainer}
           onPress={() => onAdjustHealth(player.id, 1)}
         >
-          <Text style={styles.adjustButton}>+</Text>
+          <Text style={[styles.adjustButton,
+            { transform : [{ rotate: '90deg' }]}
+          ]}>+</Text>
         </Pressable>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -410,91 +443,114 @@ const styles = StyleSheet.create({
   row: {
     flex: 1,
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+    columnGap: 4,
   },
   menu: {
-    height: 60,
+    height: '5%',
     backgroundColor: '#222',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'space-evenly',
+    paddingLeft: 50,
+    paddingRight: 20,
   },
   menuText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 20,
   },
   playerPanel: {
     flex: 1,
     flexDirection: 'row',
   },
   sideMenu: {
-    width: 70,
-    justifyContent: 'space-around',
+    width: '25%',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: '50%',
+    marginTop: '-80%',
   },
   iconButton: {
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 80,
-    width: 60,
+    justifyContent: 'space-evenly',
+    height: '50%',
+    width: '25%',
   },
   iconWrapper: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
+    width: '25%',
+    height: '25%',
+    padding: 50,
+    marginBottom: '-50%',
+  },
+  iconWrapperRight: {
+    width: '25%',
+    height: '25%',
     alignItems: 'center',
+    marginTop: '50%'
   },
   iconWithTextWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 70,
-    gap: 20,
+    height: '80%',
+    rowGap: 55,
   },
+  
   rotatedTextWrapper: {
-    width: 60,
-    height: 12,
+    height: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 5,
   },
   sideText: {
     color: 'white',
-    fontSize: 9,
+    fontSize: 18,
     textAlign: 'center',
-    position: 'absolute',
-    width: 50,
+    position: 'fixed',
+    marginTop: '15%',
+  },
+
+  sideTextRight: {
+    color: 'white',
+    fontSize: 18,
+    textAlign: 'center',
+    position: 'fixed',
+    marginTop: '60%',
+    marginBottom: '0%',
   },
   healthContainer: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    paddingVertical: 30,
+    paddingVertical: '0%',
   },
   adjustButtonContainer: {
-    width: 60,
-    height: 60,
+    width: '50%',
+    height: '50%',
     justifyContent: 'center',
     alignItems: 'center',
   },
   adjustButton: {
-    fontSize: 32,
+    fontSize: 80,
     color: 'white',
     textAlign: 'center',
     fontWeight: 'bold',
+    paddingBottom: 20,
   },
   health: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-    gap: 15,
   },
   healthNumberWrapper: {
-    width: 80,
-    height: 60,
+    width: '50%',
+    height: '50%',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 0,
   },
   healthText: {
-    fontSize: 48,
+    fontSize: 80,
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
@@ -507,20 +563,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   playerName: {
-    fontSize: 14,
+    fontSize: 18,
     color: 'white',
     textAlign: 'center',
-    position: 'absolute',
-    width: 70,
+    width: '30%',
+    height: '30%',
+    position: 'fixed',
+    paddingBottom: screenWidth * 0.45,
+    marginTop: screenHeight * 0.04,
   },
   playerModeWrapper: {
-    width: 80,
-    height: 15,
+    width: 150,
+    height: 25,
     justifyContent: 'center',
     alignItems: 'center',
   },
   playerMode: {
-    fontSize: 10,
+    fontSize: 12,
     color: '#ccc',
     textAlign: 'center',
     position: 'absolute',
