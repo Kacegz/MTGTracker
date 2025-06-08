@@ -13,7 +13,7 @@
 - ~~Overlay Counters~~ RW
 - Poprawa UI - KW
 - Cleanup projektu
-- Dokumentacja - KW
+- Dokumentacja - KL
 
 ## Link do figmy:
 
