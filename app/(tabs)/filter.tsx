@@ -3,6 +3,10 @@ import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, ActivityIndic
 import { router } from 'expo-router';
 import { searchCards } from '../services/scryfall';
 import type { SearchResponse } from '../types/card';
+import { Picker } from '@react-native-picker/picker';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+type ColorMode = 'exact' | 'including' | 'atMost';
 
 export default function FilterScreen() {
   const [name, setName] = useState('');
@@ -12,19 +16,27 @@ export default function FilterScreen() {
   const [selectedCommanderColors, setSelectedCommanderColors] = useState<string[]>([]);
   const [selectedRarities, setSelectedRarities] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [colorMode, setColorMode] = useState<ColorMode>('exact');
+
+  const translateColor = (color: string): string => {
+    if (color === 'Blue') return 'U';
+    //if (color === 'Colorless') return 'C';
+    return color.charAt(0);
+  };
 
   const toggleColor = (color: string, isCommander: boolean = false) => {
+    const translatedColor = translateColor(color);
     if (isCommander) {
       setSelectedCommanderColors(prev => 
-        prev.includes(color) 
-          ? prev.filter(c => c !== color)
-          : [...prev, color]
+        prev.includes(translatedColor) 
+          ? prev.filter(c => c !== translatedColor)
+          : [...prev, translatedColor]
       );
     } else {
       setSelectedColors(prev => 
-        prev.includes(color) 
-          ? prev.filter(c => c !== color)
-          : [...prev, color]
+        prev.includes(translatedColor) 
+          ? prev.filter(c => c !== translatedColor)
+          : [...prev, translatedColor]
       );
     }
   };
@@ -42,7 +54,14 @@ export default function FilterScreen() {
       style={[styles.colorButton, isSelected && styles.colorButtonSelected]} 
       onPress={onPress}
     >
-      <Text style={styles.colorButtonText}>{color}</Text>
+      {isSelected && (
+        <Ionicons 
+          name="checkmark" 
+          size={22} 
+          color="#4A90E2" 
+          style={styles.checkmark}
+        />
+      )}
     </Pressable>
   );
 
@@ -57,37 +76,35 @@ export default function FilterScreen() {
 
   const handleSearch = async () => {
     setIsLoading(true);
-    const results = await searchCards({
+    const searchParams = {
       name,
       text,
       type,
       colors: selectedColors,
+      color_mode: colorMode,
       commander_colors: selectedCommanderColors,
       rarity: selectedRarities,
       order: 'name'
+    };
+    
+    // Navigate to search screen with search parameters
+    router.push({
+      pathname: '/(tabs)/search',
+      params: { 
+        searchParams: JSON.stringify(searchParams)
+      }
     });
     setIsLoading(false);
-    
-    if (results) {
-      const searchResponse = results as SearchResponse;
-      // Navigate back to search screen with results
-      router.push({
-        pathname: '/(tabs)/search',
-        params: { 
-          searchResults: JSON.stringify(searchResponse.data)
-        }
-      });
-    }
   };
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
+        {/*<View style={styles.header}>
           <Pressable onPress={() => router.back()}>
             <Text style={styles.backButton}>←</Text>
           </Pressable>
-        </View>
+        </View>*/}
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Card Name</Text>
@@ -128,7 +145,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
               <ColorButton 
               color="" 
-              isSelected={selectedColors.includes('White')}
+              isSelected={selectedColors.includes(translateColor('White'))}
               onPress={() => toggleColor('White')}
               />
               <Text style={styles.TextButton}>
@@ -138,7 +155,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedColors.includes('Blue')}
+              isSelected={selectedColors.includes(translateColor('Blue'))}
               onPress={() => toggleColor('Blue')}
             />
             <Text style={styles.TextButton}>
@@ -148,7 +165,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedColors.includes('Black')}
+              isSelected={selectedColors.includes(translateColor('Black'))}
               onPress={() => toggleColor('Black')}
             />
             <Text style={styles.TextButton}>
@@ -158,7 +175,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedColors.includes('Red')}
+              isSelected={selectedColors.includes(translateColor('Red'))}
               onPress={() => toggleColor('Red')}
             />
             <Text style={styles.TextButton}>
@@ -168,7 +185,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedColors.includes('Green')}
+              isSelected={selectedColors.includes(translateColor('Green'))}
               onPress={() => toggleColor('Green')}
             />
             <Text style={styles.TextButton}>
@@ -178,12 +195,28 @@ export default function FilterScreen() {
              <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedColors.includes('Colorless')}
+              isSelected={selectedColors.includes(translateColor('Colorless'))}
               onPress={() => toggleColor('Colorless')}
             />
             <Text style={styles.TextButton}>
               Colorless
             </Text>
+            </View>
+          </View>
+          <View style={[styles.inputContainer, styles.noBorder, styles.selectContainer]}>
+            <View style={styles.colorModeContainer}>
+              <Picker
+                selectedValue={colorMode}
+                onValueChange={(value) => setColorMode(value as ColorMode)}
+                style={styles.colorModePicker}
+                dropdownIconColor="#666"
+                mode="dropdown"
+                itemStyle={styles.pickerItem}
+              >
+                <Picker.Item label="Exactly these colors" value="exact" color="white" />
+                <Picker.Item label="Including these colors" value="including" color="white" />
+                <Picker.Item label="At most these colors" value="atMost" color="white" />
+              </Picker>
             </View>
           </View>
         </View>
@@ -194,7 +227,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedCommanderColors.includes('White')}
+              isSelected={selectedCommanderColors.includes(translateColor('White'))}
               onPress={() => toggleColor('White', true)}
             />
             <Text style={styles.TextButton}>
@@ -204,7 +237,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedCommanderColors.includes('Blue')}
+              isSelected={selectedCommanderColors.includes(translateColor('Blue'))}
               onPress={() => toggleColor('Blue', true)}
             />
             <Text style={styles.TextButton}>
@@ -214,7 +247,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedCommanderColors.includes('Black')}
+              isSelected={selectedCommanderColors.includes(translateColor('Black'))}
               onPress={() => toggleColor('Black', true)}
             />
             <Text style={styles.TextButton}>
@@ -224,7 +257,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedCommanderColors.includes('Red')}
+              isSelected={selectedCommanderColors.includes(translateColor('Red'))}
               onPress={() => toggleColor('Red', true)}
             />
             <Text style={styles.TextButton}>
@@ -234,7 +267,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedCommanderColors.includes('Green')}
+              isSelected={selectedCommanderColors.includes(translateColor('Green'))}
               onPress={() => toggleColor('Green', true)}
             />
             <Text style={styles.TextButton}>
@@ -244,7 +277,7 @@ export default function FilterScreen() {
             <View style={styles.colorItem}>
             <ColorButton 
               color="" 
-              isSelected={selectedCommanderColors.includes('Colorless')}
+              isSelected={selectedCommanderColors.includes(translateColor('Colorless'))}
               onPress={() => toggleColor('Colorless', true)}
             />
             <Text style={styles.TextButton}>
@@ -326,8 +359,10 @@ const styles = StyleSheet.create({
   },
   label: {
     color: 'white',
-    marginBottom: 8,
-    fontSize: 16,
+    marginBottom: 16,
+    marginTop: 2,
+    marginLeft: -6,
+    fontSize: 18,
   },
   input: {
     backgroundColor: '#111',
@@ -368,37 +403,35 @@ const styles = StyleSheet.create({
   colorButton: {
     width: '100%',
     aspectRatio: 1,
-    maxWidth: 60,
+    maxWidth: 52,
     backgroundColor: '#111',
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#333',
   },
 
   TextButton:{
     width: 80,
     height: 40,
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 0,
   },
   colorButtonSelected: {
-    backgroundColor: '#4A90E2',
-    borderWidth: 2,
+    backgroundColor: '#111',
     borderColor: '#4A90E2',
   },
-  colorCheckmark: {
+  checkmark: {
     position: 'absolute',
-    top: 4,
-    right: 4,
   },
-
   colorButtonText: {
     color: 'white',
-    fontSize: 13,
+    fontSize: 11,
     marginTop: 4,
     textAlign: 'center',
   },
@@ -454,5 +487,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+  colorModeContainer: {
+    backgroundColor: '#111',
+    borderRadius: 45,
+    overflow: 'hidden',
+    paddingTop: 0,
+  },
+  colorModePicker: {
+    color: 'white',
+    height: 40,
+    backgroundColor: '#111',
+    paddingHorizontal: 12,
+    borderWidth: 0,
+    marginRight: 10,
+    paddingTop: 0,
+  },
+  pickerItem: {
+    color: 'white',
+    backgroundColor: '#111',
+    borderWidth: 0,
+  },
+  selectContainer: {
+    paddingTop: 0,
+  },
+  noBorder: {
+    borderTopWidth: 0,
+  },
 }); 

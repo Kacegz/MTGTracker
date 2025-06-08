@@ -2,6 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Modal, StatusBar, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+interface Player {
+  id: number;
+  color: string;
+}
+
+interface DamageScreenProps {
+  visible: boolean;
+  onClose: () => void;
+  players: Player[];
+  onDealDamage: (playerId: number, damage: number) => void;
+  onDealCommanderDamage: (sourceId: number, targetId: number, damage: number) => void;
+  commanderDamage: Record<number, Record<number, number>>;
+  initiatingPlayerId: number | null;
+  isLeftSide: boolean;
+}
+
 const DamageScreen = ({ 
     visible, 
     onClose, 
@@ -11,10 +27,10 @@ const DamageScreen = ({
     commanderDamage, 
     initiatingPlayerId, 
     isLeftSide 
-  }) => {
-    const [damageValues, setDamageValues] = useState({});
-    const [partnerToggles, setPartnerToggles] = useState({});
-    const [localCommanderDamage, setLocalCommanderDamage] = useState({});
+  }: DamageScreenProps) => {
+    const [damageValues, setDamageValues] = useState<Record<number, number>>({});
+    const [partnerToggles, setPartnerToggles] = useState<Record<number, boolean>>({});
+    const [localCommanderDamage, setLocalCommanderDamage] = useState<Record<number, Record<number, number>>>({});
   
     useEffect(() => {
       if (visible && initiatingPlayerId) {
@@ -30,7 +46,7 @@ const DamageScreen = ({
         if (savedDamageValues) {
           setDamageValues(JSON.parse(savedDamageValues));
         } else {
-          const initialValues = {};
+          const initialValues: Record<number, number> = {};
           players.forEach(player => {
             initialValues[player.id] = 0;
           });
@@ -38,7 +54,7 @@ const DamageScreen = ({
         }
       } catch (error) {
         console.error('Error loading damage values:', error);
-        const initialValues = {};
+        const initialValues: Record<number, number> = {};
         players.forEach(player => {
           initialValues[player.id] = 0;
         });
@@ -57,7 +73,7 @@ const DamageScreen = ({
       }
     };
   
-    const saveCommanderDamage = (newCommanderDamage) => {
+    const saveCommanderDamage = (newCommanderDamage: Record<number, Record<number, number>>) => {
       try {
         localStorage.setItem('commanderDamage', JSON.stringify(newCommanderDamage));
         setLocalCommanderDamage(newCommanderDamage);
@@ -66,7 +82,7 @@ const DamageScreen = ({
       }
     };
   
-    const saveDamageValues = (newDamageValues) => {
+    const saveDamageValues = (newDamageValues: Record<number, number>) => {
       try {
         localStorage.setItem(`damageValues_${initiatingPlayerId}`, JSON.stringify(newDamageValues));
         setDamageValues(newDamageValues);
@@ -86,7 +102,7 @@ const DamageScreen = ({
       }
     };
   
-    const savePartnerToggles = (newToggles) => {
+    const savePartnerToggles = (newToggles: Record<number, boolean>) => {
       try {
         localStorage.setItem('partnerToggles', JSON.stringify(newToggles));
         setPartnerToggles(newToggles);
@@ -95,15 +111,29 @@ const DamageScreen = ({
       }
     };
   
-    const adjustDamage = (playerId, amount) => {
-      const newDamageValues = {
-        ...damageValues,
-        [playerId]: Math.max(0, (damageValues[playerId] || 0) + amount)
-      };
-      saveDamageValues(newDamageValues);
+    const adjustDamage = (playerId: number, amount: number) => {
+      if (!initiatingPlayerId) return;
+      
+      const currentCommanderDamage = { ...localCommanderDamage };
+      if (!currentCommanderDamage[playerId]) {
+        currentCommanderDamage[playerId] = {};
+      }
+      
+      const currentDamage = currentCommanderDamage[playerId][initiatingPlayerId] || 0;
+      // Only allow decreasing if current damage is greater than 0
+      if (amount < 0 && currentDamage <= 0) return;
+      
+      const newDamage = Math.max(0, currentDamage + amount);
+      
+      currentCommanderDamage[playerId][initiatingPlayerId] = newDamage;
+      saveCommanderDamage(currentCommanderDamage);
+      onDealCommanderDamage(playerId, initiatingPlayerId, amount);
+      
+      // Also update the life total
+      onDealDamage(initiatingPlayerId, amount);
     };
   
-    const togglePartner = (playerId) => {
+    const togglePartner = (playerId: number) => {
       const newToggles = {
         ...partnerToggles,
         [playerId]: !partnerToggles[playerId]
@@ -112,16 +142,15 @@ const DamageScreen = ({
     };
   
     const handleDealDamage = () => {
-      const totalDamage = Object.values(damageValues).reduce((sum, damage) => sum + damage, 0);
+      const totalDamage = Object.values(damageValues).reduce((sum: number, damage: number) => sum + damage, 0);
       
-      if (totalDamage > 0 && initiatingPlayerId) {
+      if (totalDamage > 0 && initiatingPlayerId !== null) {
         onDealDamage(initiatingPlayerId, totalDamage);
         const currentCommanderDamage = { ...localCommanderDamage };
         Object.entries(damageValues).forEach(([playerId, damage]) => {
             if (damage > 0) {
               const sourcePlayerId = parseInt(playerId);
               
-
               if (!currentCommanderDamage[sourcePlayerId]) {
                 currentCommanderDamage[sourcePlayerId] = {};
               }
@@ -129,17 +158,14 @@ const DamageScreen = ({
               const currentDamage = currentCommanderDamage[sourcePlayerId][initiatingPlayerId] || 0;
               currentCommanderDamage[sourcePlayerId][initiatingPlayerId] = currentDamage + damage;
               
-
               onDealCommanderDamage(sourcePlayerId, initiatingPlayerId, damage);
             }
           });
           
-
         saveCommanderDamage(currentCommanderDamage);
       }
       
-
-      const resetValues = {};
+      const resetValues: Record<number, number> = {};
       players.forEach(player => {
         resetValues[player.id] = 0;
       });
@@ -152,14 +178,14 @@ const DamageScreen = ({
     };
   
     const resetAllDamage = () => {
-      const resetValues = {};
+      const resetValues: Record<number, number> = {};
       players.forEach(player => {
         resetValues[player.id] = 0;
       });
       saveDamageValues(resetValues);
     };
   
-    const resetCommanderDamage = (sourcePlayerId, targetPlayerId) => {
+    const resetCommanderDamage = (sourcePlayerId: number, targetPlayerId: number) => {
       const currentCommanderDamage = { ...localCommanderDamage };
       if (currentCommanderDamage[sourcePlayerId]) {
         delete currentCommanderDamage[sourcePlayerId][targetPlayerId];
@@ -170,11 +196,11 @@ const DamageScreen = ({
       saveCommanderDamage(currentCommanderDamage);
     };
   
-    if (!visible) return null;
+    if (!visible || !initiatingPlayerId) return null;
   
     const rotation = isLeftSide ? '90deg' : '-90deg';
   
-    const renderPlayerSection = (player, playerIndex, isTop = false, isLeft = false) => {
+    const renderPlayerSection = (player: Player, playerIndex: number, isTop = false, isLeft = false) => {
         const damage = damageValues[player.id] || 0;
         const isPartner = partnerToggles[player.id] || false;
         
@@ -185,27 +211,16 @@ const DamageScreen = ({
           <View style={[
             styles.playerSection,
             { backgroundColor: isPartner ? player.color : '#333' },
-            isTop ? styles.topSection : styles.bottomSection,
-            isLeft ? styles.leftSection : styles.rightSection,
+            isTop ? { borderTopWidth: 1, borderTopColor: '#444' } : { borderBottomWidth: 1, borderBottomColor: '#444' },
+            isLeft ? { borderLeftWidth: 1, borderLeftColor: '#444' } : { borderRightWidth: 1, borderRightColor: '#444' },
             isInitiatingPlayer ? styles.initiatingPlayer : null
           ]}>
             <View style={[styles.playerContent, { transform: [{ rotate: rotation }] }]}>
               <Text style={styles.playerId}>
                 {"Player "}
                 {player.id}
-                {isInitiatingPlayer && " 🎯"}
+                {isInitiatingPlayer && " (target)"}
               </Text>
-              
-              {commanderDamageDealtToInitiating > 0 && (
-                <Pressable 
-                  onPress={() => resetCommanderDamage(player.id, initiatingPlayerId)}
-                  style={styles.commanderDamageContainer}
-                >
-                  <Text style={styles.commanderDamageText}>
-                    Cmd: {commanderDamageDealtToInitiating}
-                  </Text>
-                </Pressable>
-              )}
               
               <View style={styles.damageSection}>
                 <Pressable 
@@ -215,7 +230,9 @@ const DamageScreen = ({
                   <Ionicons name="remove" size={64} color="white" />
                 </Pressable>
                 
-                <Text style={styles.damageValue}>{damage}</Text>
+                <Text style={styles.damageValue}>
+                  {commanderDamageDealtToInitiating > 0 ? commanderDamageDealtToInitiating : damage}
+                </Text>
                 
                 <Pressable 
                   style={styles.controlButton}
@@ -225,12 +242,7 @@ const DamageScreen = ({
                 </Pressable>
               </View>
       
-              <View
-                style={[
-                  styles.playerSection
-                  
-                ]}
-                >
+              <View style={styles.playerSection}>
                 <Text style={styles.partnerLabel}>Partner</Text>
                 <Switch
                   value={isPartner}
@@ -248,7 +260,7 @@ const DamageScreen = ({
       <Modal
         visible={visible}
         transparent={false}
-        animationType="slide"
+        animationType="fade"
         onRequestClose={handleClose}
       >
         <StatusBar hidden />
@@ -259,20 +271,8 @@ const DamageScreen = ({
           </View>
   
           <View style={styles.middleSection}>
-            <Pressable style={styles.gameButton} onPress={handleClose}>
-              <Text style={styles.gameButtonText}>GAME</Text>
-            </Pressable>
-            
-            <Pressable style={styles.resetButton} onPress={resetAllDamage}>
-              <Text style={styles.resetButtonText}>RESET</Text>
-            </Pressable>
-            
-            <Pressable style={styles.optionsButton}>
-              <Ionicons name="settings" size={24} color="white" />
-            </Pressable>
-            
             <Pressable style={styles.gameButton} onPress={handleDealDamage}>
-              <Text style={styles.gameButtonText}>DEAL</Text>
+              <Text style={styles.gameButtonText}>BACK</Text>
             </Pressable>
           </View>
   
@@ -360,19 +360,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 40,
   },
   gameButton: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     paddingVertical: 10,
   },
   gameButtonText: {
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  optionsButton: {
-    padding: 10,
   },
   initiatingPlayer: {
     borderWidth: 3,

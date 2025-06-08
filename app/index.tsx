@@ -5,8 +5,13 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Button } from 'react-native';
+import { Redirect } from 'expo-router';
 
-export default function HomeScreen() {
+export default function Index() {
+  return <Redirect href="/(tabs)/main" />;
+}
+
+/*export default function HomeScreen() {
 
   return (
     <ParallaxScrollView
@@ -74,3 +79,4 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
 });
+*/
