@@ -7,11 +7,12 @@
 - ~~Interfejs z wyszukiwaniem~~ - RK
 - ~~Interfejs z filtrami~~ - RK
 - ~~Interfejs Trackera~~ - KM
-- Logika odpytywania API
-- ~~Logika zapisywania do localstorage (tracker)~~ RW
-- ~~Overlay damage~~ RW
-- ~~Overlay Counters~~ RW
-- Poprawa UI - KW
+- ~~Logika odpytywania API~~ - RK
+- ~~Logika zapisywania do localstorage (tracker)~~ - RW
+- ~~Overlay damage~~ - RW
+- ~~Overlay Counters~~ - RW
+- ~~Card Details~~ - RK
+- ~~Poprawa UI~~ - RK, KW
 - Cleanup projektu
 - Dokumentacja - KL
 
