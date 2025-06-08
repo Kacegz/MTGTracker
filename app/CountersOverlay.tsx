@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
-
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const COUNTER_TYPES = [
@@ -55,7 +54,9 @@ export default function CountersOverlay({
       animationType="fade"
       onRequestClose={onClose}
     >
+      
       <TouchableOpacity 
+      
         style={styles.overlayContainer}
         activeOpacity={1}
         onPress={onClose}
@@ -136,48 +137,50 @@ export default function CountersOverlay({
 const styles = StyleSheet.create({
   overlayContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   overlayContent: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#000000',
     borderRadius: 10,
     width: '100%',
     maxWidth: 400,
-    maxHeight: screenHeight * 0.85,
+    maxHeight: screenHeight * 95,
     overflow: 'hidden',
+    alignItems: 'center',
+    alignSelf: 'center',
   },
   scrollContent: {
-    padding: 20,
+    padding: 30,
     paddingBottom: 30,
   },
   overlayHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-    gap: 8,
+    gap: 24,
   },
   modeButton: {
-    backgroundColor: '#333',
+    backgroundColor: '#3B3B3B',
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#555',
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#627AFF',
     flex: 1,
     alignItems: 'center',
     minHeight: 36,
     justifyContent: 'center',
   },
   activeModeButton: {
-    backgroundColor: '#4a5568',
-    borderColor: '#718096',
+    backgroundColor: '#627AFF',
+    borderColor: '#627AFF',
   },
   modeButtonText: {
-    color: '#ccc',
-    fontSize: screenWidth < 350 ? 10 : 12,
+    color: 'white',
+    fontSize: screenWidth < 350 ? 12 : 14,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -186,10 +189,10 @@ const styles = StyleSheet.create({
   },
   countersTitle: {
     color: 'white',
-    fontSize: screenWidth < 350 ? 20 : 24,
+    fontSize: screenWidth < 350 ? 20 : 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   modeTitle: {
     color: '#4a5568',
@@ -207,33 +210,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
     minHeight: 50,
+    gap: 12,
   },
   counterLabel: {
     color: 'white',
-    fontSize: screenWidth < 350 ? 14 : 16,
+    fontSize: screenWidth < 350 ? 14 : 18,
     fontWeight: 'bold',
     flex: 1,
     marginRight: 10,
+    textAlign: 'center',
   },
   counterControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#333',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#555',
-    minWidth: 120,
-    height: 40,
+    backgroundColor: '#000',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#627AFF',
+    minWidth: 140,
+    height: 48,
+    alignContent: 'center',
   },
   counterButton: {
-    paddingHorizontal: screenWidth < 350 ? 12 : 16,
+    paddingHorizontal: screenWidth < 350 ? 14 : 18,
     paddingVertical: 8,
-    backgroundColor: '#444',
-    borderRadius: 4,
-    minWidth: 36,
-    height: 36,
+    backgroundColor: '#000',
+    borderColor: '#000',
+    borderWidth: 2,
+    borderRadius: 6,
+    minWidth: 40,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -252,19 +259,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   backButton: {
-    backgroundColor: '#333',
-    paddingVertical: 12,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#555',
+    backgroundColor: '#000',
+    paddingVertical: 8,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#627AFF',
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 10,
     minHeight: 44,
-    justifyContent: 'center',
+    maxWidth: screenWidth < 350 ? 120 : 210,
+    alignSelf: 'center', 
   },
   backButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });
