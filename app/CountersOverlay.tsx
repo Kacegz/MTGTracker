@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity, ScrollView, Dimensions, Platform } from 'react-native';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const COUNTER_TYPES = [
@@ -158,21 +158,37 @@ const styles = StyleSheet.create({
   },
   overlayHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 20,
-    gap: 24,
+    gap: Platform.select({
+      android: 8,
+      default: 24,
+    }),
+    width: '100%',
+    paddingHorizontal: Platform.select({
+      android: 4,
+      default: 8,
+    }),
   },
   modeButton: {
     backgroundColor: '#3B3B3B',
-    paddingHorizontal: 12,
+    paddingHorizontal: Platform.select({
+      android: 8,
+      default: 12,
+    }),
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 2,
     borderColor: '#627AFF',
-    flex: 1,
+    flex: 0,
     alignItems: 'center',
     minHeight: 36,
     justifyContent: 'center',
+    minWidth: Platform.select({
+      android: 90,
+      default: 100,
+    }),
   },
   activeModeButton: {
     backgroundColor: '#627AFF',
@@ -180,9 +196,14 @@ const styles = StyleSheet.create({
   },
   modeButtonText: {
     color: 'white',
-    fontSize: screenWidth < 350 ? 12 : 14,
+    fontSize: Platform.select({
+      android: 12,
+      default: 14,
+    }),
     fontWeight: 'bold',
     textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   activeModeButtonText: {
     color: 'white',
@@ -215,11 +236,20 @@ const styles = StyleSheet.create({
   },
   counterLabel: {
     color: 'white',
-    fontSize: screenWidth < 350 ? 14 : 18,
+    fontSize: Platform.select({
+      android: 16,
+      default: 18,
+    }),
     fontWeight: 'bold',
     flex: 1,
     marginRight: 10,
     textAlign: 'center',
+    minWidth: Platform.select({
+      android: 100,
+      default: 120,
+    }),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   counterControls: {
     flexDirection: 'row',
@@ -228,35 +258,54 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     borderColor: '#627AFF',
-    minWidth: 140,
+    minWidth: Platform.select({
+      android: 120,
+      default: 140,
+    }),
     height: 48,
     alignContent: 'center',
   },
   counterButton: {
-    paddingHorizontal: screenWidth < 350 ? 14 : 18,
+    paddingHorizontal: Platform.select({
+      android: 12,
+      default: 18,
+    }),
     paddingVertical: 8,
     backgroundColor: '#000',
     borderColor: '#000',
     borderWidth: 2,
     borderRadius: 6,
-    minWidth: 40,
+    minWidth: Platform.select({
+      android: 36,
+      default: 40,
+    }),
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
   counterButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: Platform.select({
+      android: 20,
+      default: 18,
+    }),
     fontWeight: 'bold',
     textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   counterValue: {
     color: 'white',
-    fontSize: 18,
+    fontSize: Platform.select({
+      android: 20,
+      default: 18,
+    }),
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
     paddingHorizontal: 8,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   backButton: {
     backgroundColor: '#000',

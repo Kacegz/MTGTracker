@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions, Modal, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CountersOverlay from '../CountersOverlay';
 import DamageScreen from '../CommanderDamageOverlay';
@@ -362,7 +362,7 @@ function PlayerPanel({ player, health, onAdjustHealth, onOpenCounters, onOpenDam
   const iconTextRotation = isLeftSide ? '90deg' : '-90deg';
   const flexDirection = isLeftSide ? 'column' : 'column-reverse';
   const top = isLeftSide ? '-10%' : '5%';
-  const left = isLeftSide ? '8%' : '-8%';
+  const left = isLeftSide ? '2%' : '-2%';
   
   return (
     <LinearGradient
@@ -533,22 +533,35 @@ const styles = StyleSheet.create({
   },
   playerPanel: {
     flex: 1,
-    padding: 10,
+    padding: Platform.select({
+      android: 4,
+      default: 10,
+    }),
   },
   playerContent: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: Platform.select({
+      android: 2,
+      default: 8,
+    }),
   },
   playerNameContainer: {
     width: 'auto',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: Platform.select({
+      android: 4,
+      default: 10,
+    }),
   },
   playerName: {
-    fontSize: 18,
+    fontSize: Platform.select({
+      android: 14,
+      default: 18,
+    }),
     color: 'white',
     fontWeight: 'bold',
   },
@@ -557,49 +570,103 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'center',
     height: '100%',
+    minWidth: Platform.select({
+      android: 60,
+      default: 80,
+    }),
+    maxWidth: Platform.select({
+      android: 70,
+      default: 100,
+    }),
   },
   actionButton: {
     height: '40%',
     justifyContent: 'center',
     width: '100%',
+    minWidth: Platform.select({
+      android: 60,
+      default: 80,
+    }),
+    maxWidth: Platform.select({
+      android: 70,
+      default: 100,
+    }),
   },
   actionButtonContent: {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
     flexDirection: 'column-reverse',
-    gap: '20%',
-    top: '5%',
+    gap: Platform.select({
+      android: '20%',
+      default: '20%',
+    }),
+    top: Platform.select({
+      android: '5%',
+      default: '5%',
+    }),
   },
   actionButtonText: {
     color: 'white',
-    fontSize: 16,
-    marginTop: 5,
+    fontSize: Platform.select({
+      android: 12,
+      default: 14,
+    }),
+    marginTop: 2,
+    textAlign: 'center',
+    width: '100%',
   },
   lifeContainer: {
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 10,
+    gap: Platform.select({
+      android: 20,
+      default: 4,
+    }),
+    minWidth: Platform.select({
+      android: 70,
+      default: 60,
+    }),
+    maxWidth: Platform.select({
+      android: 70,
+      default: 80,
+    }),
   },
   lifeButton: {
-    width: 60,
-    height: '100%',
+    width: Platform.select({
+      android: 32,
+      default: 40,
+    }),
+    height: Platform.select({
+      android: 32,
+      default: 40,
+    }),
     justifyContent: 'center',
     alignItems: 'center',
   },
   lifeButtonText: {
-    fontSize: 50,
+    fontSize: Platform.select({
+      android: 28,
+      default: 36,
+    }),
     color: 'white',
     fontWeight: 'bold',
   },
   lifeTotal: {
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: Platform.select({
+      android: 48,
+      default: 60,
+    }),
   },
   lifeText: {
-    fontSize: 60,
+    fontSize: Platform.select({
+      android: 48,
+      default: 48,
+    }),
     color: 'white',
     fontWeight: 'bold',
   },

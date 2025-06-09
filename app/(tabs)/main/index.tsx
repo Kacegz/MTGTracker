@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -54,9 +55,15 @@ const styles = StyleSheet.create({
   },
   title: {
     color: 'white',
-    fontSize: 64,
+    fontSize: Platform.select({
+      android: 48,
+      default: 64,
+    }),
     fontWeight: '400',
-    marginBottom: '-5%',
+    marginBottom: Platform.select({
+      android: '-2%',
+      default: '-5%',
+    }),
     marginTop: 8,
     textAlign: 'center',
   },
@@ -71,24 +78,44 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 10,
     backgroundColor: '#333',
-    height: '52%',
-    paddingVertical: '10%',
+    height: Platform.select({
+      android: '60%',
+      default: '52%',
+    }),
+    paddingVertical: Platform.select({
+      android: '5%',
+      default: '10%',
+    }),
     borderTopWidth: 2,
   },
   button: {
     width: '45%',
-    height: '45%',
+    height: Platform.select({
+      android: '40%',
+      default: '45%',
+    }),
     backgroundColor: '#111',
-    paddingVertical: '15%',
+    paddingVertical: Platform.select({
+      android: '10%',
+      default: '15%',
+    }),
     marginBottom: 8,
     borderRadius: 8,
     borderColor: '#7F7FFF',
     borderWidth: 1,
     alignItems: 'center',
-    alignContent: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
   },
   buttonText: {
     color: 'white',
-    fontSize: 24,
+    fontSize: Platform.select({
+      android: 20,
+      default: 24,
+    }),
+    textAlign: 'center',
+    width: '100%',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
 });
