@@ -101,16 +101,17 @@ export default function CardGridScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111',
-    padding: GRID_PADDING,
+    backgroundColor: '#222',
+    //padding: GRID_PADDING,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    //marginBottom: 8,
+    padding: GRID_PADDING,
   },
   searchInput: {
-    backgroundColor: '#222',
+    backgroundColor: '#111',
     borderRadius: 8,
     marginLeft: 8,
     flex: 1,
@@ -120,8 +121,12 @@ const styles = StyleSheet.create({
   },
   navBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     marginVertical: 8,
+    backgroundColor: '#333',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    paddingVertical: 8,
   },
   navButton: {
     flexDirection: 'row',
@@ -130,10 +135,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
+    width: 80,
+    textAlign: 'center',
+    alignContent: 'center',
+    alignSelf: 'center',
   },
   navButtonText: {
     color: 'white',
-    marginLeft: 4,
+    marginLeft: 0,
   },
   cardsList: {
     paddingVertical: CARD_MARGIN,
