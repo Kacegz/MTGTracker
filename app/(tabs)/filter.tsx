@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { searchCards } from '../services/scryfall';
 import type { SearchResponse } from '../types/card';
@@ -57,7 +57,7 @@ export default function FilterScreen() {
       {isSelected && (
         <Ionicons 
           name="checkmark" 
-          size={22} 
+          size={28} 
           color="#4A90E2" 
           style={styles.checkmark}
         />
@@ -208,14 +208,41 @@ export default function FilterScreen() {
               <Picker
                 selectedValue={colorMode}
                 onValueChange={(value) => setColorMode(value as ColorMode)}
-                style={styles.colorModePicker}
+                style={[
+                  styles.colorModePicker,
+                  Platform.OS === 'android' && {
+                    backgroundColor: '#222',
+                    color: 'white',
+                  }
+                ]}
                 dropdownIconColor="#666"
                 mode="dropdown"
-                itemStyle={styles.pickerItem}
+                itemStyle={[
+                  styles.pickerItem,
+                  Platform.OS === 'android' && {
+                    backgroundColor: '#222',
+                    color: 'white',
+                  }
+                ]}
               >
-                <Picker.Item label="Exactly these colors" value="exact" color="white" />
-                <Picker.Item label="Including these colors" value="including" color="white" />
-                <Picker.Item label="At most these colors" value="atMost" color="white" />
+                <Picker.Item 
+                  label="Exactly these colors" 
+                  value="exact" 
+                  color="white"
+                  style={{ backgroundColor: '#222' }}
+                />
+                <Picker.Item 
+                  label="Including these colors" 
+                  value="including" 
+                  color="white"
+                  style={{ backgroundColor: '#222' }}
+                />
+                <Picker.Item 
+                  label="At most these colors" 
+                  value="atMost" 
+                  color="white"
+                  style={{ backgroundColor: '#222' }}
+                />
               </Picker>
             </View>
           </View>
@@ -401,11 +428,10 @@ const styles = StyleSheet.create({
   },
 
   colorButton: {
-    width: '100%',
-    aspectRatio: 1,
-    maxWidth: 52,
+    width: 48,
+    height: 48,
     backgroundColor: '#111',
-    borderRadius: 6,
+    borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
@@ -413,14 +439,13 @@ const styles = StyleSheet.create({
   },
 
   TextButton:{
-    width: 80,
-    height: 40,
+    width: '100%',
     color: 'white',
     fontSize: 16,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 0,
+    textAlign: 'center',
+    marginTop: 8,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   colorButtonSelected: {
     backgroundColor: '#111',
@@ -447,15 +472,18 @@ const styles = StyleSheet.create({
   rarityGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
+    gap: 12,
   },
   rarityButton: {
     backgroundColor: '#111',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 8,
-    minWidth: 80,
-
+    width: '48%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 36,
   },
   rarityButtonSelected: {
     backgroundColor: '#4A90E2',
@@ -465,6 +493,7 @@ const styles = StyleSheet.create({
   rarityButtonText: {
     color: 'white',
     textAlign: 'center',
+    fontSize: 14,
   },
   searchButtonContainer: {
     position: 'absolute',
@@ -488,24 +517,38 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   colorModeContainer: {
-    backgroundColor: '#111',
+    backgroundColor: '#222',
     borderRadius: 45,
     overflow: 'hidden',
     paddingTop: 0,
+    borderWidth: 2,
+    borderColor: '#333',
+    height: 52,
+    justifyContent: 'center',
   },
   colorModePicker: {
     color: 'white',
-    height: 40,
+    height: 52,
     backgroundColor: '#111',
     paddingHorizontal: 12,
     borderWidth: 0,
     marginRight: 10,
-    paddingTop: 0,
+    paddingTop: Platform.select({
+      android: -4,
+      default: 0,
+    }),
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    paddingBottom: 0,
   },
   pickerItem: {
     color: 'white',
     backgroundColor: '#111',
     borderWidth: 0,
+    fontSize: 16,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    height: 52,
   },
   selectContainer: {
     paddingTop: 0,

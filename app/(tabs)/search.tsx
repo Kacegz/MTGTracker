@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, FlatList, Dimensions, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, FlatList, Dimensions, Image, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // pakiet ikon
 import { router, useLocalSearchParams } from 'expo-router';
 import type { Card } from '../types/card';
@@ -204,12 +204,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#222',
-    //padding: GRID_PADDING,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    //marginBottom: 8,
     padding: GRID_PADDING,
   },
   searchInput: {
@@ -218,7 +216,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     flex: 1,
     paddingHorizontal: 12,
-    height: 40,
+    height: Platform.select({
+      android: 36,
+      default: 40,
+    }),
     color: 'white',
   },
   navBar: {
@@ -228,14 +229,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    paddingVertical: 8,
+    paddingVertical: Platform.select({
+      android: 6,
+      default: 8,
+    }),
   },
   navButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#222',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: Platform.select({
+      android: 6,
+      default: 8,
+    }),
     borderRadius: 8,
     width: 80,
     textAlign: 'center',
@@ -245,6 +252,10 @@ const styles = StyleSheet.create({
   navButtonText: {
     color: 'white',
     marginLeft: 0,
+    fontSize: Platform.select({
+      android: 14,
+      default: 16,
+    }),
   },
   cardsList: {
     paddingVertical: CARD_MARGIN,
@@ -266,14 +277,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     borderRadius: 8,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...Platform.select({
+      android: {
+        elevation: 5,
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+    }),
   },
   cardImage: {
     width: '100%',
@@ -283,12 +300,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 32,
+    paddingTop: Platform.select({
+      android: 24,
+      default: 32,
+    }),
     minHeight: 200,
   },
   emptyStateText: {
     color: '#999',
-    fontSize: 18,
+    fontSize: Platform.select({
+      android: 16,
+      default: 18,
+    }),
     textAlign: 'center',
     paddingHorizontal: 20,
   },

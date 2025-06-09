@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Modal, StatusBar, Switch } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Modal, StatusBar, Switch, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface Player {
@@ -227,7 +227,10 @@ const DamageScreen = ({
                   style={styles.controlButton}
                   onPress={() => adjustDamage(player.id, -1)}
                 >
-                  <Ionicons name="remove" size={64} color="white" />
+                  <Ionicons name="remove" size={Platform.select({
+                    android: 32,
+                    default: 64
+                  })} color="white" />
                 </Pressable>
                 
                 <Text style={styles.damageValue}>
@@ -238,7 +241,10 @@ const DamageScreen = ({
                   style={styles.controlButton}
                   onPress={() => adjustDamage(player.id, 1)}
                 >
-                  <Ionicons name="add" size={64} color="white" />
+                  <Ionicons name="add" size={Platform.select({
+                    android: 32,
+                    default: 64
+                  })} color="white" />
                 </Pressable>
               </View>
       
@@ -303,52 +309,105 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    
   },
   playerContent: {
     alignItems: 'center',
     justifyContent: 'space-between',
     flexDirection: 'column',
-    height: '50%',
+    height: Platform.select({
+      android: '50%',
+      default: '50%',
+    }),
     width: '100%',
+    paddingHorizontal: Platform.select({
+      android: 2,
+      default: 8,
+    }),
   },
   damageSection: {
     alignItems: 'center',
     justifyContent: 'space-between',
     flexDirection: 'row',
-    height: '40%',
+    height: Platform.select({
+      android: '50%',
+      default: '40%',
+    }),
     width: '100%',
+    paddingHorizontal: Platform.select({
+      android: 12,
+      default: 16,
+    }),
+    gap: Platform.select({
+      android: 8,
+      default: 16,
+    }),
   },
   playerId: {
-    fontSize: 24,
+    fontSize: Platform.select({
+      android: 18,
+      default: 24,
+    }),
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
-    paddingTop: 5,
+    paddingTop: Platform.select({
+      android: 0,
+      default: 5,
+    }),
   },
   controlButton: {
-    padding: 25,
-    borderRadius: 25,
-    width: 50,
-    height: 50,
+    padding: Platform.select({
+      android: 8,
+      default: 25,
+    }),
+    borderRadius: Platform.select({
+      android: 16,
+      default: 25,
+    }),
+    width: Platform.select({
+      android: 48,
+      default: 50,
+    }),
+    height: Platform.select({
+      android: 48,
+      default: 50,
+    }),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: -20,
+    marginBottom: Platform.select({
+      android: -8,
+      default: -20,
+    }),
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   damageValue: {
-    fontSize: 100,
+    fontSize: Platform.select({
+      android: 64,
+      default: 100,
+    }),
     fontWeight: '600',
     color: 'white',
     textAlign: 'center',
     marginBottom: 0,
+    flex: 1,
+    textAlignVertical: 'center',
   },
   partnerSection: {
     alignItems: 'center',
-    gap: 10,
-    paddingBottom: 20,
+    gap: Platform.select({
+      android: 2,
+      default: 10,
+    }),
+    paddingBottom: Platform.select({
+      android: 4,
+      default: 20,
+    }),
   },
   partnerLabel: {
-    fontSize: 18,
+    fontSize: Platform.select({
+      android: 14,
+      default: 18,
+    }),
     color: 'white',
     fontWeight: '600',
     paddingBottom: 0,
@@ -356,53 +415,83 @@ const styles = StyleSheet.create({
   middleSection: {
     flexDirection: 'row',
     backgroundColor: '#222',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: Platform.select({
+      android: 4,
+      default: 10,
+    }),
+    paddingHorizontal: Platform.select({
+      android: 8,
+      default: 20,
+    }),
     justifyContent: 'center',
     alignItems: 'center',
   },
   gameButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: Platform.select({
+      android: 8,
+      default: 20,
+    }),
+    paddingVertical: Platform.select({
+      android: 4,
+      default: 10,
+    }),
   },
   gameButtonText: {
     color: 'white',
-    fontSize: 24,
+    fontSize: Platform.select({
+      android: 16,
+      default: 24,
+    }),
     fontWeight: 'bold',
   },
   initiatingPlayer: {
-    borderWidth: 3,
+    borderWidth: Platform.select({
+      android: 1,
+      default: 3,
+    }),
     borderColor: '#FFD700',
   },
-  
   resetButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 6,
+    paddingHorizontal: Platform.select({
+      android: 8,
+      default: 15,
+    }),
+    paddingVertical: Platform.select({
+      android: 2,
+      default: 6,
+    }),
     backgroundColor: '#ff4444',
     borderRadius: 5,
   },
-  
   resetButtonText: {
     color: 'white',
-    fontSize: 15,
+    fontSize: Platform.select({
+      android: 10,
+      default: 15,
+    }),
     fontWeight: 'bold',
   },
-  
   commanderDamageContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: Platform.select({
+      android: 2,
+      default: 8,
+    }),
+    paddingVertical: Platform.select({
+      android: 0,
+      default: 2,
+    }),
     borderRadius: 10,
   },
-  
   commanderDamageText: {
-    fontSize: 14,
+    fontSize: Platform.select({
+      android: 10,
+      default: 14,
+    }),
     color: 'white',
     textAlign: 'center',
     opacity: 0.8,
   },
-
-
 });
 
 export default DamageScreen;
