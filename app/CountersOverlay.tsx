@@ -7,7 +7,7 @@ const COUNTER_TYPES = [
   { key: 'energy', label: 'ENERGY' },
   { key: 'poison', label: 'POISON' },
   { key: 'experience', label: 'EXPERIENCE' },
-  { key: 'elderRing', label: 'ELDER RING' },
+  { key: 'burden', label: 'BURDEN' },
   { key: 'storm', label: 'STORM' },
 ];
 
@@ -34,7 +34,7 @@ export default function CountersOverlay({
 }: CountersOverlayProps) {
 
   const adjustCounter = (counterType: string, amount: number) => {
-    if (!playerId) return;
+    if (playerId === null) return;
     const currentValue = counters[counterType] || 0;
     const newValue = Math.max(0, currentValue + amount);
     onUpdateCounters(playerId, counterType, newValue);

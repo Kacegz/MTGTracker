@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CountersOverlay from '../CountersOverlay';
 import DamageScreen from '../CommanderDamageOverlay';
@@ -38,6 +38,7 @@ export default function LifeCounterScreen() {
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const [damageScreenVisible, setDamageScreenVisible] = useState(false);
   const [initiatingPlayerId, setInitiatingPlayerId] = useState<number | null>(null);
+  const [optionsVisible, setOptionsVisible] = useState(false);
 
   useEffect(() => {
     loadHealth(); 
@@ -245,6 +246,20 @@ localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
     return selectedPlayer ? (playerModes[selectedPlayer] || []) : [];
   };
 
+  const handleReset = () => {
+    localStorage.clear();
+    // Reset all state to initial values
+    const initialHealth: Record<number, number> = {};
+    players.forEach(player => {
+      initialHealth[player.id] = 40;
+    });
+    setHealth(initialHealth);
+    setCommanderDamage({});
+    setCounters({});
+    setPlayerModes({});
+    setOptionsVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
@@ -262,13 +277,11 @@ localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
       </View>
   
       <View style={styles.menu}>
-        <Pressable>
-          <Text style={styles.menuText}>GAME</Text>
+        <Text style={styles.menuText}>GAME</Text>
+        <Pressable onPress={() => setOptionsVisible(true)}>
+          <Ionicons name="settings-outline" size={28} color="white" />
         </Pressable>
-        <Ionicons name="settings-outline" size={28} color="white" />
-        <Pressable>
-          <Text style={styles.menuText}>OPTIONS</Text>
-        </Pressable>
+        <Text style={styles.menuText}>OPTIONS</Text>
       </View>
   
       <View style={styles.row}>
@@ -306,6 +319,30 @@ localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
         initiatingPlayerId={initiatingPlayerId} 
         isLeftSide={getOrientation(initiatingPlayerId)}
       />
+
+      <Modal
+        visible={optionsVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setOptionsVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Pressable 
+              style={styles.resetButton}
+              onPress={handleReset}
+            >
+              <Text style={styles.resetButtonText}>RESET</Text>
+            </Pressable>
+            <Pressable 
+              style={styles.closeButton}
+              onPress={() => setOptionsVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>CLOSE</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
   
@@ -323,113 +360,147 @@ type PlayerPanelProps = {
 function PlayerPanel({ player, health, onAdjustHealth, onOpenCounters, onOpenDamage, playerMode }: PlayerPanelProps) {
   const isLeftSide = player.id === 1 || player.id === 3;
   const iconTextRotation = isLeftSide ? '90deg' : '-90deg';
+  const flexDirection = isLeftSide ? 'column' : 'column-reverse';
+  const top = isLeftSide ? '-10%' : '5%';
+  const left = isLeftSide ? '8%' : '-8%';
   
   return (
     <LinearGradient
-        colors={isLeftSide 
-          ? [darkenHex(player.color, 30), player.color] 
-          : [player.color, darkenHex(player.color, 30)]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={[
-          styles.playerPanel,
-          { flexDirection: isLeftSide ? 'row' : 'row-reverse' }
-        ]}
-      >  
-      <View style={styles.playerName}>
-        <Text style={[styles.playerName, { transform: [{ rotate: iconTextRotation }] }]}>
-          {player.name}
-        </Text>
-      </View>
-      <View style={styles.sideMenu}>
-        <Pressable style={styles.iconButton} onPress={onOpenDamage}>
-          <View style={[
-            styles.iconWithTextWrapper,
-            { flexDirection: isLeftSide ? 'column' : 'column-reverse' }
-          ]}>
-            <View style={[
-                styles.iconWrapper,
-                !isLeftSide && styles.iconWrapperRight // dodaj tylko jeśli nie lewa strona
-              ]}>
-              <Ionicons 
-                name="flash-outline" 
-                size={24} 
-                color="white" 
-                style={{ transform: [{ rotate: iconTextRotation }] }}
-              />
+      colors={isLeftSide 
+        ? [darkenHex(player.color, 30), player.color] 
+        : [player.color, darkenHex(player.color, 30)]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.playerPanel}
+    >  
+      <View style={styles.playerContent}>
+        {isLeftSide ? (
+          <>
+            {/* Action Buttons */}
+            <View style={[styles.actionButtonsContainer, { flexDirection: 'column' }]}>
+              <Pressable style={styles.actionButton} onPress={onOpenDamage}>
+                <View style={[styles.actionButtonContent, {flexDirection: flexDirection}]}>
+                  <Ionicons 
+                    name="flash-outline" 
+                    size={24} 
+                    color="white" 
+                    style={[{ transform: [{ rotate: iconTextRotation }] }, { top }]}
+                  />
+                  <Text style={[styles.actionButtonText, { transform: [{ rotate: iconTextRotation }] }, { top }]}>
+                    Damage
+                  </Text>
+                </View>
+              </Pressable>
+              
+              <Pressable style={styles.actionButton} onPress={onOpenCounters}>
+                <View style={[styles.actionButtonContent, {flexDirection: flexDirection}]}>
+                  <Ionicons 
+                    name="apps-outline" 
+                    size={24} 
+                    color="white" 
+                    style={[{ transform: [{ rotate: iconTextRotation }] }, { top }]}
+                  />
+                  <Text style={[styles.actionButtonText, { transform: [{ rotate: iconTextRotation }] }, { top }]}>
+                    Counters
+                  </Text>
+                </View>
+              </Pressable>
             </View>
-            <View style={styles.rotatedTextWrapper}>
-              <Text style={[
-                      styles.sideText,
-                      !isLeftSide && styles.sideTextRight,
-                      { transform: [{ rotate: iconTextRotation }] }
-                    ]}>
-                Damage
+
+            {/* Life Total */}
+            <View style={[styles.lifeContainer, { left }]}>
+              <Pressable 
+                style={styles.lifeButton}
+                onPress={() => onAdjustHealth(player.id, 1)}
+              >
+                <Text style={[styles.lifeButtonText, { transform: [{ rotate: '90deg' }] }]}>+</Text>
+              </Pressable>
+
+              <View style={styles.lifeTotal}>
+                <Text style={[styles.lifeText, { transform: [{ rotate: iconTextRotation }] }]}>
+                  {health}
+                </Text>
+              </View>
+
+              <Pressable 
+                style={styles.lifeButton}
+                onPress={() => onAdjustHealth(player.id, -1)}
+              >
+                <Text style={[styles.lifeButtonText, { transform: [{ rotate: '90deg' }] }]}>-</Text>
+              </Pressable>
+            </View>
+
+            {/* Player Name */}
+            <View style={[styles.playerNameContainer, { transform: [{ rotate: iconTextRotation }] }, { left }]}>
+              <Text style={[styles.playerName]}>
+                {player.name}
               </Text>
             </View>
-            </View>
-        </Pressable>
-        
-        
-        
-        <Pressable style={styles.iconButton} onPress={onOpenCounters}>
-          <View style={[
-            styles.iconWithTextWrapper,
-            { flexDirection: isLeftSide ? 'column' : 'column-reverse' }
-          ]}>
-            <View style={[
-                styles.iconWrapper,
-                !isLeftSide && styles.iconWrapperRight // dodaj tylko jeśli nie lewa strona
-              ]}>
-              <Ionicons 
-                name="apps-outline" 
-                size={24} 
-                color="white" 
-                style={{ transform: [{ rotate: iconTextRotation }] }}
-              />
-            </View>
-            <View style={styles.rotatedTextWrapper}>
-              <Text style={[
-                      styles.sideText,
-                      !isLeftSide && styles.sideTextRight,
-                      { transform: [{ rotate: iconTextRotation }] }
-                    ]}>
-                Counters
+          </>
+        ) : (
+          <>
+            {/* Player Name */}
+            <View style={[styles.playerNameContainer, { transform: [{ rotate: iconTextRotation }] }, { left }]}>
+              <Text style={[styles.playerName]}>
+                {player.name}
               </Text>
             </View>
-          </View>
-        </Pressable>
-      </View>
 
-      <View style={[styles.healthContainer,{flexDirection: isLeftSide ? 'column' : 'column-reverse'}]}>
-        <Pressable 
-          style={styles.adjustButtonContainer}
-          onPress={() => onAdjustHealth(player.id, -1)}
-        >
-          <Text style={[styles.adjustButton,
-            {transform : [{ rotate: '90deg' }]}
-          ]}>-</Text>
-        </Pressable>
+            {/* Life Total */}
+            <View style={[styles.lifeContainer, { left }]}>
+              <Pressable 
+                style={styles.lifeButton}
+                onPress={() => onAdjustHealth(player.id, 1)}
+              >
+                <Text style={[styles.lifeButtonText, { transform: [{ rotate: '-90deg' }] }]}>+</Text>
+              </Pressable>
 
-        <View style={styles.health}>
-          <View style={styles.healthNumberWrapper}>
-            <Text style={[
-              styles.healthText,
-              { transform: [{ rotate: iconTextRotation }] }
-            ]}>
-              {health}
-            </Text>
-          </View>
-        </View>
+              <View style={styles.lifeTotal}>
+                <Text style={[styles.lifeText, { transform: [{ rotate: iconTextRotation }] }]}>
+                  {health}
+                </Text>
+              </View>
 
-        <Pressable 
-          style={styles.adjustButtonContainer}
-          onPress={() => onAdjustHealth(player.id, 1)}
-        >
-          <Text style={[styles.adjustButton,
-            { transform : [{ rotate: '90deg' }]}
-          ]}>+</Text>
-        </Pressable>
+              <Pressable 
+                style={styles.lifeButton}
+                onPress={() => onAdjustHealth(player.id, -1)}
+              >
+                <Text style={[styles.lifeButtonText, { transform: [{ rotate: '-90deg' }] }]}>-</Text>
+              </Pressable>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={[styles.actionButtonsContainer, { flexDirection: 'column-reverse' }]}>
+              <Pressable style={styles.actionButton} onPress={onOpenDamage}>
+                <View style={styles.actionButtonContent}>
+                  <Ionicons 
+                    name="flash-outline" 
+                    size={24} 
+                    color="white" 
+                    style={{ transform: [{ rotate: iconTextRotation }] }}
+                  />
+                  <Text style={[styles.actionButtonText, { transform: [{ rotate: iconTextRotation }] }]}>
+                    Damage
+                  </Text>
+                </View>
+              </Pressable>
+              
+              <Pressable style={styles.actionButton} onPress={onOpenCounters}>
+                <View style={styles.actionButtonContent}>
+                  <Ionicons 
+                    name="apps-outline" 
+                    size={24} 
+                    color="white" 
+                    style={{ transform: [{ rotate: iconTextRotation }] }}
+                  />
+                  <Text style={[styles.actionButtonText, { transform: [{ rotate: iconTextRotation }] }]}>
+                    Counters
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+          </>
+        )}
       </View>
     </LinearGradient>
   );
@@ -462,127 +533,115 @@ const styles = StyleSheet.create({
   },
   playerPanel: {
     flex: 1,
+    padding: 10,
+  },
+  playerContent: {
+    flex: 1,
     flexDirection: 'row',
-  },
-  sideMenu: {
-    width: '25%',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: '50%',
-    marginTop: '-80%',
   },
-  iconButton: {
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    height: '50%',
-    width: '25%',
-  },
-  iconWrapper: {
-    width: '25%',
-    height: '25%',
-    padding: 50,
-    marginBottom: '-50%',
-  },
-  iconWrapperRight: {
-    width: '25%',
-    height: '25%',
-    alignItems: 'center',
-    marginTop: '50%'
-  },
-  iconWithTextWrapper: {
+  playerNameContainer: {
+    width: 'auto',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '80%',
-    rowGap: 55,
-  },
-  
-  rotatedTextWrapper: {
-    height: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 5,
-  },
-  sideText: {
-    color: 'white',
-    fontSize: 18,
-    textAlign: 'center',
-    position: 'fixed',
-    marginTop: '15%',
-  },
-
-  sideTextRight: {
-    color: 'white',
-    fontSize: 18,
-    textAlign: 'center',
-    position: 'fixed',
-    marginTop: '60%',
-    marginBottom: '0%',
-  },
-  healthContainer: {
-    flex: 1,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    paddingVertical: '0%',
-  },
-  adjustButtonContainer: {
-    width: '50%',
-    height: '50%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  adjustButton: {
-    fontSize: 80,
-    color: 'white',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    paddingBottom: 20,
-  },
-  health: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  healthNumberWrapper: {
-    width: '50%',
-    height: '50%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 0,
-  },
-  healthText: {
-    fontSize: 80,
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    position: 'absolute',
-  },
-  playerNameWrapper: {
-    width: 80,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 10,
   },
   playerName: {
     fontSize: 18,
     color: 'white',
-    textAlign: 'center',
-    width: '30%',
-    height: '30%',
-    position: 'fixed',
-    paddingBottom: screenWidth * 0.45,
-    marginTop: screenHeight * 0.04,
+    fontWeight: 'bold',
   },
-  playerModeWrapper: {
-    width: 150,
-    height: 25,
+  actionButtonsContainer: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    height: '100%',
+  },
+  actionButton: {
+    height: '40%',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  actionButtonContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    flexDirection: 'column-reverse',
+    gap: '20%',
+    top: '5%',
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 5,
+  },
+  lifeContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+  },
+  lifeButton: {
+    width: 60,
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  playerMode: {
-    fontSize: 12,
-    color: '#ccc',
-    textAlign: 'center',
-    position: 'absolute',
-    width: 70,
+  lifeButtonText: {
+    fontSize: 50,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  lifeTotal: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lifeText: {
+    fontSize: 60,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#222',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    maxWidth: 300,
+    alignItems: 'center',
+    gap: 20,
+  },
+  resetButton: {
+    backgroundColor: '#ff4444',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    backgroundColor: '#333',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

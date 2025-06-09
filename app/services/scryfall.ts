@@ -1,14 +1,5 @@
 import { Alert } from 'react-native';
-
-interface SearchParams {
-  name?: string;
-  text?: string;
-  type?: string;
-  colors?: string[];
-  commander_colors?: string[];
-  rarity?: string[];
-  order?: string;
-}
+import { SearchParams, SearchResponse } from '../types/card';
 
 const BASE_URL = 'https://api.scryfall.com';
 
@@ -22,50 +13,81 @@ const getRarityCode = (rarity: string): string => {
   }
 };
 
-export const searchCards = async (params: SearchParams) => {
+export async function searchCards(params: SearchParams): Promise<SearchResponse | null> {
   try {
-    // Build query string based on Scryfall's syntax
-    let query = ['game:paper']; // Always include paper games
+    let query = '';
     
-    if (params.name) query.push(`name:${params.name}`);
-    if (params.text) query.push(`oracle:${params.text}`);
-    if (params.type) query.push(`type:${params.type}`);
-    
-    if (params.colors && params.colors.length > 0) {
-      const colorString = params.colors.map(c => c[0].toLowerCase()).join('');
-      query.push(`color:${colorString}`);
-    }
-    
-    if (params.commander_colors && params.commander_colors.length > 0) {
-      const colorString = params.commander_colors.map(c => c[0].toLowerCase()).join('');
-      query.push(`commander:${colorString}`);
-    }
-    
-    if (params.rarity && params.rarity.length > 0) {
-      const rarityQueries = params.rarity.map(r => `rarity:${getRarityCode(r)}`);
-      query.push(`(${rarityQueries.join(' OR ')})`);
-    }
+    // If q parameter is present, use it directly as the query
+    if (params.q) {
+      query = `game:paper ${params.q}`;
+    } else {
+      // Otherwise, build the query from individual parameters
+      const conditions: string[] = ['game:paper'];
 
-    // Join with + instead of space for proper URL encoding
-    const queryString = query.join('+');
-    const orderParam = params.order ? `&order=${params.order}` : '';
-    
-    const response = await fetch(`${BASE_URL}/cards/search?q=${queryString}${orderParam}`, {
-      headers: {
-        'User-Agent': 'MTGTracker/1.0',
-        'Accept': 'application/json'
+      if (params.name) {
+        conditions.push(`name:"${params.name}"`);
       }
-    });
+      if (params.text) {
+        conditions.push(`oracle:"${params.text}"`);
+      }
+      if (params.type) {
+        const types = params.type.split(',').map(t => t.trim());
+        if (types.length > 1) {
+          const typeQueries = types.map(t => `type:${t}`);
+          conditions.push(`(${typeQueries.join(' ')})`);
+        } else {
+          conditions.push(`type:${params.type}`);
+        }
+      }
+      if (params.colors && params.colors.length > 0) {
+        const colorQuery = params.colors.join('');
+        switch (params.color_mode) {
+          case 'exact':
+            conditions.push(`color=${colorQuery}`);
+            break;
+          case 'including':
+            conditions.push(`color>=${colorQuery}`);
+            break;
+          case 'atMost':
+            conditions.push(`color<=${colorQuery}`);
+            break;
+        }
+      }
+      if (params.commander_colors && params.commander_colors.length > 0) {
+        conditions.push(`commander:${params.commander_colors.join('')}`);
+      }
+      if (params.rarity && params.rarity.length > 0) {
+        const rarityQueries = params.rarity.map(r => `rarity:${getRarityCode(r)}`);
+        conditions.push(`(${rarityQueries.join(' OR ')})`);
+      }
+      if (params.order) {
+        conditions.push(`order:${params.order}`);
+      }
 
-    if (!response.ok) {
-      throw new Error('Search failed');
+      query = conditions.join(' ');
     }
 
+    const page = params.page || 1;
+    const url = `${BASE_URL}/cards/search?q=${encodeURIComponent(query)}&page=${page}`;
+    console.log('Search URL:', url);
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      if (response.status === 404) {
+        // Return empty results for "not found" instead of throwing an error
+        return {
+          data: [],
+          has_more: false,
+          total_cards: 0
+        };
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Scryfall API Error:', error);
+    console.error('Error searching cards:', error);
     Alert.alert('Error', 'Failed to search cards. Please try again.');
     return null;
   }
-}; 
+} 
