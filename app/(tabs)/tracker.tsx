@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Dimensions, Modal, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CountersOverlay from '../CountersOverlay';
 import DamageScreen from '../CommanderDamageOverlay';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
+import Constants from 'expo-constants'; // ADD: Import Constants for status bar height
+
 type DamageMap = Record<number, Record<number, number>>;
 type PlayerCountersMap = Record<number, Record<string, number>>;
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -17,7 +21,6 @@ const darkenHex = (hex: string, percent = 20) => {
   return `#${(R << 16 | G << 8 | B).toString(16).padStart(6, '0')}`;
 };
 
-
 const players = [
   { id: 1, name: 'Player 1', color: '#1E3A8A' },
   { id: 2, name: 'Player 2', color: '#CA8A04' },
@@ -29,11 +32,59 @@ const COUNTER_TYPES = [
   'generic', 'energy', 'poison', 'experience', 'elderRing', 'storm'
 ];
 
+// Storage keys
+const STORAGE_KEYS = {
+  PLAYER_HEALTH: 'playerHealth',
+  PLAYER_COUNTERS: 'playerCounters',
+  PLAYER_MODES: 'playerModes',
+  COMMANDER_DAMAGE: 'commanderDamage',
+};
+
+// Default values
+const getInitialHealth = () => ({
+  1: 40,
+  2: 40,
+  3: 40,
+  4: 40,
+});
+
+const getInitialCounters = (): PlayerCountersMap => {
+  const initialCounters: PlayerCountersMap = {};
+  players.forEach(player => {
+    initialCounters[player.id] = {};
+    COUNTER_TYPES.forEach(counter => {
+      initialCounters[player.id][counter] = 0;
+    });
+  });
+  return initialCounters;
+};
+
+const getInitialPlayerModes = () => {
+  const initialModes: Record<number, string[]> = {};
+  players.forEach(player => {
+    initialModes[player.id] = [];
+  });
+  return initialModes;
+};
+
+const getInitialCommanderDamage = (): DamageMap => {
+  const initialDamage: DamageMap = {};
+  players.forEach(player => {
+    initialDamage[player.id] = {};
+    players.forEach(target => {
+      if (target.id !== player.id) {
+        initialDamage[player.id][target.id] = 0;
+      }
+    });
+  });
+  return initialDamage;
+};
+
 export default function LifeCounterScreen() {
-  const [health, setHealth] = useState<Record<number, number>>({});
-  const [counters, setCounters] = useState<Record<number, Record<string, number>>>({});
-  const [playerModes, setPlayerModes] = useState<Record<number, string[]>>({});
-  const [commanderDamage, setCommanderDamage] = useState<Record<number, Record<number, number>>>({});
+  const [health, setHealth] = useState<Record<number, number>>(getInitialHealth());
+  const [counters, setCounters] = useState<Record<number, Record<string, number>>>(getInitialCounters());
+  const [playerModes, setPlayerModes] = useState<Record<number, string[]>>(getInitialPlayerModes());
+  const [commanderDamage, setCommanderDamage] = useState<Record<number, Record<number, number>>>(getInitialCommanderDamage());
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const [damageScreenVisible, setDamageScreenVisible] = useState(false);
@@ -41,126 +92,112 @@ export default function LifeCounterScreen() {
   const [optionsVisible, setOptionsVisible] = useState(false);
 
   useEffect(() => {
-    loadHealth(); 
-    loadCounters();
-    loadPlayerModes();
-    loadCommanderDamage(); 
+    loadAllData();
   }, []);
 
+  const loadAllData = async () => {
+    await Promise.all([
+      loadHealth(),
+      loadCounters(),
+      loadPlayerModes(),
+      loadCommanderDamage(),
+    ]);
+  };
 
-  const loadHealth = () => {
+  const loadHealth = async () => {
     try {
-      const savedHealth = localStorage.getItem('playerHealth');
+      const savedHealth = await AsyncStorage.getItem(STORAGE_KEYS.PLAYER_HEALTH);
       if (savedHealth) {
         setHealth(JSON.parse(savedHealth));
       } else {
-        const initialHealth = {
-          1: 40,
-          2: 40,
-          3: 40,
-          4: 40,
-        };
+        const initialHealth = getInitialHealth();
         setHealth(initialHealth);
-        localStorage.setItem('playerHealth', JSON.stringify(initialHealth));
+        await AsyncStorage.setItem(STORAGE_KEYS.PLAYER_HEALTH, JSON.stringify(initialHealth));
       }
     } catch (error) {
       console.error('Error loading health:', error);
+      setHealth(getInitialHealth());
     }
   };
 
-  const saveHealth = (newHealth: React.SetStateAction<{}>) => {
+  const saveHealth = async (newHealth: Record<number, number>) => {
     try {
-      localStorage.setItem('playerHealth', JSON.stringify(newHealth));
+      await AsyncStorage.setItem(STORAGE_KEYS.PLAYER_HEALTH, JSON.stringify(newHealth));
       setHealth(newHealth);
     } catch (error) {
       console.error('Error saving health:', error);
     }
   };
 
-  const loadCommanderDamage = () => {
+  const loadCommanderDamage = async () => {
     try {
-      const savedDamage = localStorage.getItem('commanderDamage');
+      const savedDamage = await AsyncStorage.getItem(STORAGE_KEYS.COMMANDER_DAMAGE);
       if (savedDamage) {
         setCommanderDamage(JSON.parse(savedDamage));
       } else {
-        const initialDamage: DamageMap = {};
-        players.forEach(player => {
-          initialDamage[player.id] = {};
-          players.forEach(target => {
-            if (target.id !== player.id) {
-              initialDamage[player.id][target.id] = 0;
-            }
-          });
-        });
+        const initialDamage = getInitialCommanderDamage();
         setCommanderDamage(initialDamage);
-        localStorage.setItem('commanderDamage', JSON.stringify(initialDamage));
+        await AsyncStorage.setItem(STORAGE_KEYS.COMMANDER_DAMAGE, JSON.stringify(initialDamage));
       }
     } catch (error) {
       console.error('Error loading commander damage:', error);
+      setCommanderDamage(getInitialCommanderDamage());
     }
   };
 
-  const saveCommanderDamage = (newDamage: React.SetStateAction<{}>) => {
+  const saveCommanderDamage = async (newDamage: Record<number, Record<number, number>>) => {
     try {
-      localStorage.setItem('commanderDamage', JSON.stringify(newDamage));
+      await AsyncStorage.setItem(STORAGE_KEYS.COMMANDER_DAMAGE, JSON.stringify(newDamage));
       setCommanderDamage(newDamage);
     } catch (error) {
       console.error('Error saving commander damage:', error);
     }
   };
 
-  const loadCounters = () => {
+  const loadCounters = async () => {
     try {
-      const savedCounters = localStorage.getItem('playerCounters');
+      const savedCounters = await AsyncStorage.getItem(STORAGE_KEYS.PLAYER_COUNTERS);
       if (savedCounters) {
         setCounters(JSON.parse(savedCounters));
       } else {
-      const initialCounters: PlayerCountersMap = {};
-      players.forEach(player => {
-        initialCounters[player.id] = {} as Record<string, number>; // lub Record<CounterType, number>
-        COUNTER_TYPES.forEach(counter => {
-          initialCounters[player.id][counter] = 0;
-        });
-      });
-
-setCounters(initialCounters);
-localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
+        const initialCounters = getInitialCounters();
+        setCounters(initialCounters);
+        await AsyncStorage.setItem(STORAGE_KEYS.PLAYER_COUNTERS, JSON.stringify(initialCounters));
       }
     } catch (error) {
       console.error('Error loading counters:', error);
+      setCounters(getInitialCounters());
     }
   };
 
-  const loadPlayerModes = () => {
+  const loadPlayerModes = async () => {
     try {
-      const savedModes = localStorage.getItem('playerModes');
+      const savedModes = await AsyncStorage.getItem(STORAGE_KEYS.PLAYER_MODES);
       if (savedModes) {
         setPlayerModes(JSON.parse(savedModes));
       } else {
-        const initialModes: { [key: number]: any[] } = {};
-        players.forEach(player => {
-          initialModes[player.id] = [];
-        });
+        const initialModes = getInitialPlayerModes();
         setPlayerModes(initialModes);
-        localStorage.setItem('playerModes', JSON.stringify(initialModes));
+        await AsyncStorage.setItem(STORAGE_KEYS.PLAYER_MODES, JSON.stringify(initialModes));
       }
     } catch (error) {
       console.error('Error loading player modes:', error);
+      setPlayerModes(getInitialPlayerModes());
     }
   };
 
-  const saveCounters = (newCounters: React.SetStateAction<{}>) => {
+  const saveCounters = async (newCounters: Record<number, Record<string, number>>) => {
     try {
-      localStorage.setItem('playerCounters', JSON.stringify(newCounters));
+      await AsyncStorage.setItem(STORAGE_KEYS.PLAYER_COUNTERS, JSON.stringify(newCounters));
       setCounters(newCounters);
     } catch (error) {
       console.error('Error saving counters:', error);
     }
   };
 
-  const savePlayerModes = (newModes: React.SetStateAction<{}>) => {
+  const savePlayerModes = async (newModes: Record<number, string[]>) => {
     try {
-      localStorage.setItem('playerModes', JSON.stringify(newModes));
+      await AsyncStorage.setItem(STORAGE_KEYS.PLAYER_MODES, JSON.stringify(newModes));
       setPlayerModes(newModes);
     } catch (error) {
       console.error('Error saving player modes:', error);
@@ -246,22 +283,46 @@ localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
     return selectedPlayer ? (playerModes[selectedPlayer] || []) : [];
   };
 
-  const handleReset = () => {
-    localStorage.clear();
-    // Reset all state to initial values
-    const initialHealth: Record<number, number> = {};
-    players.forEach(player => {
-      initialHealth[player.id] = 40;
-    });
-    setHealth(initialHealth);
-    setCommanderDamage({});
-    setCounters({});
-    setPlayerModes({});
-    setOptionsVisible(false);
+  const handleReset = async () => {
+    try {
+      // Clear all stored data
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.PLAYER_HEALTH,
+        STORAGE_KEYS.PLAYER_COUNTERS,
+        STORAGE_KEYS.PLAYER_MODES,
+        STORAGE_KEYS.COMMANDER_DAMAGE,
+      ]);
+
+      // Reset all state to initial values
+      const initialHealth = getInitialHealth();
+      const initialCounters = getInitialCounters();
+      const initialModes = getInitialPlayerModes();
+      const initialDamage = getInitialCommanderDamage();
+
+      setHealth(initialHealth);
+      setCounters(initialCounters);
+      setPlayerModes(initialModes);
+      setCommanderDamage(initialDamage);
+
+      // Save initial values to storage
+      await Promise.all([
+        AsyncStorage.setItem(STORAGE_KEYS.PLAYER_HEALTH, JSON.stringify(initialHealth)),
+        AsyncStorage.setItem(STORAGE_KEYS.PLAYER_COUNTERS, JSON.stringify(initialCounters)),
+        AsyncStorage.setItem(STORAGE_KEYS.PLAYER_MODES, JSON.stringify(initialModes)),
+        AsyncStorage.setItem(STORAGE_KEYS.COMMANDER_DAMAGE, JSON.stringify(initialDamage)),
+      ]);
+
+      setOptionsVisible(false);
+    } catch (error) {
+      console.error('Error resetting game:', error);
+    }
   };
 
   return (
     <View style={styles.container}>
+      {/* ADD: Status bar spacer */}
+      <StatusBar style="light" backgroundColor="#111" />
+      <View style={styles.statusBarSpacer} />
       <View style={styles.row}>
         {players.slice(0, 2).map((player) => (
           <PlayerPanel
@@ -345,7 +406,6 @@ localStorage.setItem('playerCounters', JSON.stringify(initialCounters));
       </Modal>
     </View>
   );
-  
 }
 
 type PlayerPanelProps = {
@@ -509,6 +569,11 @@ function PlayerPanel({ player, health, onAdjustHealth, onOpenCounters, onOpenDam
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#111',
+  },
+  // ADD: Status bar spacer style
+  statusBarSpacer: {
+    height: Constants.statusBarHeight,
     backgroundColor: '#111',
   },
   row: {

@@ -10,6 +10,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
+import { StatusBar } from 'expo-status-bar';
+
 export default function MTGTrackerScreen() {
   const router = useRouter();
   type RoutePath = Parameters<typeof router.push>[0];
@@ -19,6 +22,9 @@ export default function MTGTrackerScreen() {
   };
   return (
     <View style={styles.container}>
+      {/* ADD: Status bar spacer */}
+      <StatusBar style="light" backgroundColor="#111" />
+      <View style={styles.statusBarSpacer} />
       <View style={styles.header}>
         <Text style={styles.title}>MTG</Text>
         <Text style={styles.title}>Tracker</Text>
@@ -48,6 +54,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#222', // ciemne tło
     width: '100%',
+  },
+  statusBarSpacer: {
+  height: Constants.statusBarHeight,
+  backgroundColor: '#111',
   },
   header: {
     alignItems: 'center',

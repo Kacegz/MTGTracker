@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons'; // pakiet ikon
 import { router, useLocalSearchParams } from 'expo-router';
 import type { Card } from '../types/card';
 import { searchCards } from '../services/scryfall';
+import { StatusBar } from 'expo-status-bar';
+import Constants from 'expo-constants'; // ADD: Import Constants for status bar height
 
 // Calculate dimensions for the grid
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -137,7 +139,9 @@ export default function CardGridScreen() {
 
   return (
     <View style={styles.container}>
-
+      {/* ADD: Status bar spacer */}
+      <StatusBar style="light" backgroundColor="#111" />
+      <View style={styles.statusBarSpacer} />
       {/* Górna belka z logo i wyszukiwarką */}
       <View style={styles.header}>
         <Ionicons name="dice-outline" size={32} color="white" />
@@ -210,6 +214,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: GRID_PADDING,
   },
+  statusBarSpacer: {
+  height: Constants.statusBarHeight,
+  backgroundColor: '#111',
+},
   searchInput: {
     backgroundColor: '#111',
     borderRadius: 8,
