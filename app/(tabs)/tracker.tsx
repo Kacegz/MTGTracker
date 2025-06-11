@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Platform.select({
-      android: 2,
+      android: 0,
       default: 8,
     }),
   },
@@ -617,8 +617,9 @@ const styles = StyleSheet.create({
     width: 'auto',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: -4,
     paddingHorizontal: Platform.select({
-      android: 4,
+      android: 0,
       default: 10,
     }),
   },
@@ -636,11 +637,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: '100%',
     minWidth: Platform.select({
-      android: 60,
+      android: 50,
       default: 80,
     }),
     maxWidth: Platform.select({
-      android: 70,
+      android: 50,
       default: 100,
     }),
   },
