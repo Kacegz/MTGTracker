@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Modal, StatusBar, Switch, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Player {
   id: number;
@@ -40,9 +41,9 @@ const DamageScreen = ({
       }
     }, [visible, initiatingPlayerId]);
   
-    const loadDamageValues = () => {
+    const loadDamageValues = async () => {
       try {
-        const savedDamageValues = localStorage.getItem(`damageValues_${initiatingPlayerId}`);
+        const savedDamageValues = await AsyncStorage.getItem(`damageValues_${initiatingPlayerId}`);
         if (savedDamageValues) {
           setDamageValues(JSON.parse(savedDamageValues));
         } else {
@@ -62,9 +63,9 @@ const DamageScreen = ({
       }
     };
   
-    const loadCommanderDamage = () => {
+    const loadCommanderDamage = async () => {
       try {
-        const savedCommanderDamage = localStorage.getItem('commanderDamage');
+        const savedCommanderDamage = await AsyncStorage.getItem('commanderDamage');
         if (savedCommanderDamage) {
           setLocalCommanderDamage(JSON.parse(savedCommanderDamage));
         }
@@ -73,27 +74,27 @@ const DamageScreen = ({
       }
     };
   
-    const saveCommanderDamage = (newCommanderDamage: Record<number, Record<number, number>>) => {
+    const saveCommanderDamage = async (newCommanderDamage: Record<number, Record<number, number>>) => {
       try {
-        localStorage.setItem('commanderDamage', JSON.stringify(newCommanderDamage));
+        await AsyncStorage.setItem('commanderDamage', JSON.stringify(newCommanderDamage));
         setLocalCommanderDamage(newCommanderDamage);
       } catch (error) {
         console.error('Error saving commander damage:', error);
       }
     };
   
-    const saveDamageValues = (newDamageValues: Record<number, number>) => {
+    const saveDamageValues = async (newDamageValues: Record<number, number>) => {
       try {
-        localStorage.setItem(`damageValues_${initiatingPlayerId}`, JSON.stringify(newDamageValues));
+        await AsyncStorage.setItem(`damageValues_${initiatingPlayerId}`, JSON.stringify(newDamageValues));
         setDamageValues(newDamageValues);
       } catch (error) {
         console.error('Error saving damage values:', error);
       }
     };
   
-    const loadPartnerToggles = () => {
+    const loadPartnerToggles = async () => {
       try {
-        const savedToggles = localStorage.getItem('partnerToggles');
+        const savedToggles = await AsyncStorage.getItem('partnerToggles');
         if (savedToggles) {
           setPartnerToggles(JSON.parse(savedToggles));
         }
@@ -102,16 +103,16 @@ const DamageScreen = ({
       }
     };
   
-    const savePartnerToggles = (newToggles: Record<number, boolean>) => {
+    const savePartnerToggles = async (newToggles: Record<number, boolean>) => {
       try {
-        localStorage.setItem('partnerToggles', JSON.stringify(newToggles));
+        await AsyncStorage.setItem('partnerToggles', JSON.stringify(newToggles));
         setPartnerToggles(newToggles);
       } catch (error) {
         console.error('Error saving partner toggles:', error);
       }
     };
   
-    const adjustDamage = (playerId: number, amount: number) => {
+    const adjustDamage = async (playerId: number, amount: number) => {
       if (!initiatingPlayerId) return;
       
       const currentCommanderDamage = { ...localCommanderDamage };
@@ -126,22 +127,22 @@ const DamageScreen = ({
       const newDamage = Math.max(0, currentDamage + amount);
       
       currentCommanderDamage[playerId][initiatingPlayerId] = newDamage;
-      saveCommanderDamage(currentCommanderDamage);
+      await saveCommanderDamage(currentCommanderDamage);
       onDealCommanderDamage(playerId, initiatingPlayerId, amount);
       
       // Also update the life total
       onDealDamage(initiatingPlayerId, amount);
     };
   
-    const togglePartner = (playerId: number) => {
+    const togglePartner = async (playerId: number) => {
       const newToggles = {
         ...partnerToggles,
         [playerId]: !partnerToggles[playerId]
       };
-      savePartnerToggles(newToggles);
+      await savePartnerToggles(newToggles);
     };
   
-    const handleDealDamage = () => {
+    const handleDealDamage = async () => {
       const totalDamage = Object.values(damageValues).reduce((sum: number, damage: number) => sum + damage, 0);
       
       if (totalDamage > 0 && initiatingPlayerId !== null) {
@@ -162,14 +163,14 @@ const DamageScreen = ({
             }
           });
           
-        saveCommanderDamage(currentCommanderDamage);
+        await saveCommanderDamage(currentCommanderDamage);
       }
       
       const resetValues: Record<number, number> = {};
       players.forEach(player => {
         resetValues[player.id] = 0;
       });
-      saveDamageValues(resetValues);
+      await saveDamageValues(resetValues);
       onClose();
     };
   
@@ -177,15 +178,15 @@ const DamageScreen = ({
       onClose();
     };
   
-    const resetAllDamage = () => {
+    const resetAllDamage = async () => {
       const resetValues: Record<number, number> = {};
       players.forEach(player => {
         resetValues[player.id] = 0;
       });
-      saveDamageValues(resetValues);
+      await saveDamageValues(resetValues);
     };
   
-    const resetCommanderDamage = (sourcePlayerId: number, targetPlayerId: number) => {
+    const resetCommanderDamage = async (sourcePlayerId: number, targetPlayerId: number) => {
       const currentCommanderDamage = { ...localCommanderDamage };
       if (currentCommanderDamage[sourcePlayerId]) {
         delete currentCommanderDamage[sourcePlayerId][targetPlayerId];
@@ -193,7 +194,7 @@ const DamageScreen = ({
           delete currentCommanderDamage[sourcePlayerId];
         }
       }
-      saveCommanderDamage(currentCommanderDamage);
+      await saveCommanderDamage(currentCommanderDamage);
     };
   
     if (!visible || !initiatingPlayerId) return null;
