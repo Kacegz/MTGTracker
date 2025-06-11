@@ -5,6 +5,8 @@ import { searchCards } from '../services/scryfall';
 import type { SearchResponse } from '../types/card';
 import { Picker } from '@react-native-picker/picker';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { StatusBar } from 'expo-status-bar';
+import Constants from 'expo-constants'; // ADD: Import Constants for status bar height
 
 type ColorMode = 'exact' | 'including' | 'atMost';
 
@@ -99,6 +101,9 @@ export default function FilterScreen() {
 
   return (
     <View style={styles.container}>
+      {/* ADD: Status bar spacer */}
+      <StatusBar style="light" backgroundColor="#111" />
+      <View style={styles.statusBarSpacer} />
       <ScrollView style={styles.scrollView}>
         {/*<View style={styles.header}>
           <Pressable onPress={() => router.back()}>
@@ -363,6 +368,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#222',
     padding: 0,
+  },
+  statusBarSpacer: {
+  height: Constants.statusBarHeight,
+  backgroundColor: '#111',
   },
   scrollView: {
     flex: 1,
